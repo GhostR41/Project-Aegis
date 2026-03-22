@@ -1,0 +1,178 @@
+:root {
+  --font-main: 'JetBrains Mono', monospace;
+  --color-pale-white: #f0f0f5;
+  --color-peach: #FFDAB9;
+  --color-dark-final: #02040a;
+  /* "blue-darkblue-minimal red-black" approximation: Very dark, almost black blue */
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  width: 100%;
+  /* Do not force height 100% or overflow hidden here, allow natural window scroll */
+  min-height: 100vh;
+  font-family: var(--font-main);
+  background-color: #000;
+  color: var(--color-pale-white);
+  margin: 0;
+  padding: 0;
+}
+
+/* Hide Scrollbar globally but allow scrolling */
+html {
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE 10+ */
+}
+
+/* Chrome/Safari */
+html::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+body::-webkit-scrollbar {
+  display: none;
+}
+
+/* Top Bar - Grey, fades in with scroll */
+#top-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 80px;
+  background-color: #2a2a2a;
+  /* Grey */
+  z-index: 100;
+  opacity: 0;
+  /* Starts invisible, fades in */
+  transition: opacity 0.4s ease-out;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+#top-bar.visible {
+  opacity: 1;
+}
+
+#bar-title {
+  font-family: var(--font-main);
+  font-size: clamp(1.2rem, 3vw, 2rem);
+  font-weight: 400;
+  letter-spacing: 0.15em;
+  color: #4FC3F7;
+  /* Cyan blue */
+}
+
+/* Video Background */
+.video-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1;
+  /* Above body background */
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.video-background iframe {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  /* Cover the viewport maintaining aspect ratio */
+  width: 100vw;
+  height: 56.25vw;
+  /* 16:9 */
+  min-height: 100vh;
+  min-width: 177.78vh;
+  /* 16:9 */
+  transform: translate(-50%, -50%);
+  border: none;
+}
+
+/* Ensure centering of text */
+#title-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+  /* Above video */
+  pointer-events: none;
+}
+
+#main-title {
+  font-size: clamp(2rem, 5vw, 5rem);
+  font-weight: 100;
+  letter-spacing: 0.2em;
+  color: #ffffff;
+  /* Multi-layer shadow for visibility on any background */
+  text-shadow:
+    /* Dark outline effect */
+    -1px -1px 0 rgba(0, 0, 0, 0.7),
+    1px -1px 0 rgba(0, 0, 0, 0.7),
+    -1px 1px 0 rgba(0, 0, 0, 0.7),
+    1px 1px 0 rgba(0, 0, 0, 0.7),
+    /* Soft glow for extra contrast */
+    0 0 10px rgba(0, 0, 0, 0.8),
+    0 0 20px rgba(0, 0, 0, 0.5),
+    0 0 40px rgba(0, 0, 0, 0.3);
+  transition: opacity 0.3s ease-out;
+}
+
+/* Scroll Structure */
+.scroll-container {
+  position: relative;
+  width: 100%;
+  z-index: 1;
+}
+
+.hero-spacer {
+  height: 100vh;
+  /* Takes up the first screen so we see the video */
+  width: 100%;
+}
+
+.content-section {
+  position: relative;
+  min-height: 200vh;
+  /* Long enough to scroll */
+  background-color: #fff;
+  color: var(--color-dark-final);
+  z-index: 5;
+  opacity: 0;
+  /* Starts hidden, fades in or slides up */
+  display: flex;
+  justify-content: center;
+  padding-top: 150px;
+  /* Space for the title which will move to top */
+}
+
+.content-wrapper {
+  max-width: 800px;
+  width: 80%;
+  text-align: center;
+}
+
+.fade-in-text {
+  font-size: 1.5rem;
+  margin-bottom: 2rem;
+  font-weight: 400;
+}
