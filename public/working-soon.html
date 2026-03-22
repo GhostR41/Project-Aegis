@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project: 𝙰𝚎𝚐𝚒𝚜 — Start</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Inter:wght@100..900&family=Public+Sans:ital,wght@0,100..900;1,100..900&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0c0c0e;
+      --card: rgba(30, 30, 34, 0.9);
+      --card-border: rgba(255,255,255,0.06);
+      --accent: #ff5e3a;
+      --text: #f0f0f5;
+      --muted: #777;
+      --font-body: 'DM Mono', monospace;
+      --font-sub: 'Public Sans', sans-serif;
+      --font-head: 'Inter', sans-serif;
+      --font-title: 'Space Grotesk', sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; cursor: none !important; }
+
+    #custom-cursor {
+      position: fixed; width: 36px; height: 36px;
+      background: url('/cursor/asteroid.png') center/contain no-repeat;
+      pointer-events: none; z-index: 99999;
+      transform: translate(-50%, -50%);
+    }
+
+    html, body { width: 100%; height: 100%; font-family: var(--font-body); background: var(--bg); color: var(--text); overflow: hidden; }
+
+    /* ═══════════ NAV BAR ═══════════ */
+    .top-nav {
+      position: fixed; top: 16px; left: 50%; transform: translateX(-50%);
+      width: calc(100% - 40px); max-width: 960px; height: 52px;
+      background: rgba(22, 22, 22, 0.88);
+      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+      border-radius: 32px; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 8px 0 22px;
+      border: 1px solid var(--card-border);
+      box-shadow: 0 6px 30px rgba(0,0,0,0.5);
+    }
+    .nav-l { display: flex; align-items: center; gap: 8px; font-family: var(--font-title); font-weight: 700; font-size: 0.95rem; color: #fff; letter-spacing: 0.06em; }
+    .nav-l .dot { width: 13px; height: 13px; background: var(--accent); border-radius: 3px; transform: rotate(45deg); }
+    .nav-m { display: flex; gap: 28px; }
+    .nav-m a { text-decoration: none; color: var(--muted); font-family: var(--font-sub); font-size: 0.88rem; font-weight: 500; transition: color 0.3s; }
+    .nav-m a:hover { color: #fff; }
+    .nav-r a { background: #f4f4f4; color: #000; padding: 9px 20px; border-radius: 22px; text-decoration: none; font-family: var(--font-head); font-weight: 600; font-size: 0.82rem; transition: opacity 0.3s; }
+    .nav-r a:hover { opacity: 0.85; }
+
+    /* ═══════════ INTRO SCREEN ═══════════ */
+    #intro {
+      position: fixed; inset: 0; background: #000;
+      display: flex; align-items: center; justify-content: center;
+      z-index: 50;
+      transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    #intro.out { opacity: 0; transform: scale(1.08); pointer-events: none; }
+
+    .circle-wrap { position: relative; width: 340px; height: 340px; }
+    .circle-wrap svg { width: 100%; height: 100%; }
+    .spin-g { animation: sp 10s linear infinite; transform-origin: 200px 200px; }
+    @keyframes sp { to { transform: rotate(360deg); } }
+
+    .play-circle {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+      width: 90px; height: 90px; border-radius: 50%;
+      background: rgba(255,255,255,0.07);
+      backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.12);
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.3s, transform 0.3s;
+    }
+    .play-circle:hover { background: rgba(255,255,255,0.14); transform: translate(-50%,-50%) scale(1.08); }
+    .play-circle svg { width: 24px; height: 24px; fill: #fff; margin-left: 3px; }
+
+    /* ═══════════ TRANSITION ═══════════ */
+    #transition {
+      position: fixed; inset: 0; background: #000; z-index: 60;
+      display: none; align-items: center; justify-content: center; flex-direction: column; gap: 24px;
+    }
+    #transition.on { display: flex; }
+    .t-rings { position: relative; width: 100px; height: 100px; }
+    .t-ring { position: absolute; border: 2px solid rgba(255,255,255,0.15); border-radius: 50%; animation: rng 1.8s ease-out infinite; }
+    .t-ring:nth-child(1) { width: 30px; height: 30px; top: 35px; left: 35px; }
+    .t-ring:nth-child(2) { width: 60px; height: 60px; top: 20px; left: 20px; animation-delay: 0.35s; }
+    .t-ring:nth-child(3) { width: 90px; height: 90px; top: 5px; left: 5px; animation-delay: 0.7s; }
+    @keyframes rng { 0% { transform: scale(0.6); opacity: 1; border-color: var(--accent); } 100% { transform: scale(2.2); opacity: 0; } }
+    .t-label { font-family: var(--font-title); font-size: 1.4rem; color: #fff; letter-spacing: 0.12em; opacity: 0; animation: fadeUp 0.8s ease forwards 0.3s; }
+    @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } from { transform: translateY(16px); } }
+
+    /* ═══════════ DASHBOARD ═══════════ */
+    #dash {
+      width: 100vw; height: 100vh;
+      display: none; flex-direction: column;
+    }
+    #dash.on { display: flex; }
+
+    .grid {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 5fr 3fr;
+      grid-template-rows: 1.15fr 1fr;
+      gap: 16px;
+      padding: 16px 20px 24px 20px;
+      overflow: hidden;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 28px;
+      border: 1px solid var(--card-border);
+      position: relative;
+      overflow: hidden;
+      opacity: 0;
+      transform: translateY(24px);
+    }
+    .card.show { animation: cUp 0.7s cubic-bezier(0.16,1,0.3,1) forwards; }
+    @keyframes cUp { to { opacity: 1; transform: translateY(0); } }
+    .card:hover { background: rgba(36,36,40,0.95); }
+
+    /* Card 1 — Agent Output */
+    .c1 { grid-column: 1; grid-row: 1; display: flex; align-items: flex-end; padding: 44px; }
+    .c1 h2 { font-family: var(--font-head); font-size: clamp(2.2rem, 3.8vw, 3.6rem); font-weight: 300; color: rgba(255,255,255,0.85); line-height: 1.15; }
+
+    /* Card 2 — Workflow */
+    .c2 { grid-column: 2; grid-row: 1; display: flex; align-items: center; padding: 36px; }
+    .wf { display: flex; flex-direction: column; gap: 6px; }
+    .wf span { font-family: var(--font-sub); font-size: 1.15rem; color: rgba(255,255,255,0.75); font-weight: 400; line-height: 1.5; }
+    .wf .sl { color: rgba(255,255,255,0.3); font-family: var(--font-body); }
+
+    /* Card 3 — Input */
+    .c3 { grid-column: 1; grid-row: 2; }
+    .inp-wrap { position: absolute; bottom: 28px; left: 28px; right: 28px; }
+    .inp {
+      width: 100%; height: 72px;
+      background: rgba(0,0,0,0.55); border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 14px; padding: 18px; resize: none; outline: none;
+      color: var(--text); font-family: var(--font-body); font-size: 0.9rem;
+      transition: border-color 0.3s;
+    }
+    .inp::placeholder { color: #555; }
+    .inp:focus { border-color: rgba(255,255,255,0.18); }
+
+    /* Card 4 — Status */
+    .c4 { grid-column: 2; grid-row: 2; }
+  </style>
+</head>
+<body>
+  <div id="custom-cursor"></div>
+
+  <!-- ───── NAV (always visible) ───── -->
+  <nav class="top-nav">
+    <div class="nav-l"><div class="dot"></div><span>Project: Aegis</span></div>
+    <div class="nav-m">
+      <a href="/#inspiration">Inspiration</a>
+      <a href="/#about">About this project</a>
+      <a href="/#how-this-helps">How this helps</a>
+    </div>
+    <div class="nav-r"><a href="/" id="home-btn">Home</a></div>
+  </nav>
+
+  <!-- ───── INTRO ───── -->
+  <div id="intro">
+    <div class="circle-wrap">
+      <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+        <defs><path id="cp" d="M200,200 m-160,0 a160,160 0 1,0 320,0 a160,160 0 1,0 -320,0" fill="none"/></defs>
+        <g class="spin-g">
+          <text fill="white" font-family="Inter, -apple-system, sans-serif" font-size="20" font-weight="500" letter-spacing="1.5">
+            <textPath href="#cp" startOffset="0%">— Autonomous Planetary Defence Assistant №⁜※ — Autonomous Planetary Defence Assistant №⁜※</textPath>
+          </text>
+        </g>
+      </svg>
+      <div class="play-circle" id="play-btn">
+        <svg viewBox="0 0 24 24"><polygon points="7,4 20,12 7,20"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- ───── TRANSITION ───── -->
+  <div id="transition">
+    <div class="t-rings"><div class="t-ring"></div><div class="t-ring"></div><div class="t-ring"></div></div>
+    <div class="t-label">Initializing Autonomous Systems</div>
+  </div>
+
+  <!-- ───── DASHBOARD ───── -->
+  <div id="dash">
+    <div class="grid">
+      <div class="card c1"><h2>Agent Output<br>Here</h2></div>
+      <div class="card c2">
+        <div class="wf">
+          <span>Project Workflow</span>
+          <span class="sl">/</span>
+          <span>Agent Activation</span>
+          <span class="sl">/</span>
+          <span>Progress Display</span>
+        </div>
+      </div>
+      <div class="card c3">
+        <div class="inp-wrap"><textarea class="inp" placeholder="Ask anything..." rows="3"></textarea></div>
+      </div>
+      <div class="card c4"></div>
+    </div>
+  </div>
+
+  <script>
+    // Cursor
+    const cur = document.getElementById('custom-cursor');
+    document.addEventListener('mousemove', e => { cur.style.left = e.clientX+'px'; cur.style.top = e.clientY+'px'; });
+
+    // Screens
+    const intro = document.getElementById('intro');
+    const trans = document.getElementById('transition');
+    const dash  = document.getElementById('dash');
+
+    document.getElementById('play-btn').addEventListener('click', () => {
+      intro.classList.add('out');
+      setTimeout(() => {
+        intro.style.display = 'none';
+        trans.classList.add('on');
+        setTimeout(() => {
+          trans.classList.remove('on');
+          trans.style.display = 'none';
+          dash.classList.add('on');
+          document.querySelectorAll('.card').forEach((c, i) => {
+            setTimeout(() => c.classList.add('show'), i * 150);
+          });
+        }, 2800);
+      }, 700);
+    });
+
+    // Home
+    document.getElementById('home-btn').addEventListener('click', e => {
+      e.preventDefault();
+      document.body.style.transition = 'opacity 0.4s';
+      document.body.style.opacity = '0';
+      setTimeout(() => location.href = '/', 400);
+    });
+  </script>
+</body>
+</html>
