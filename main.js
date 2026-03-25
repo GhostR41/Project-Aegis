@@ -1,65 +1,89 @@
-
-
 document.addEventListener('DOMContentLoaded', () => {
-    const videoBg = document.getElementById('video-bg');
-    const contentSection = document.getElementById('white-content');
+    // ── Custom Cursor ──
+    const cursor = document.getElementById('custom-cursor');
+    if (cursor) {
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+        });
+        document.addEventListener('mouseenter', () => cursor.style.opacity = '1');
+        document.addEventListener('mouseleave', () => cursor.style.opacity = '0');
+    }
+
+    // ── Core DOM References ──
     const mainTitle = document.getElementById('main-title');
-    const titleContainer = document.getElementById('title-container');
     const topBar = document.getElementById('top-bar');
 
-    // Configuration
-    const fadeEnd = window.innerHeight; // When full transition should be complete
+    let lastScrollY = window.scrollY;
+    let ticking = false;
 
     window.addEventListener('scroll', () => {
-        const scrollY = window.scrollY;
+        if (!ticking) {
+            window.requestAnimationFrame(() => {
+                const currentScrollY = window.scrollY;
+                const windowHeight = window.innerHeight;
 
-        // Normalize scroll progress (0 to 1) over the viewport height
-        let progress = Math.min(Math.max(scrollY / fadeEnd, 0), 1);
+                // Title fade-out
+                const progress = Math.min(currentScrollY / (windowHeight * 0.4), 1);
+                if (mainTitle) {
+                    mainTitle.style.opacity = Math.max(0, 1 - progress);
+                    mainTitle.style.transform = `translate(-50%, -50%) scale(${1 + (progress * 0.2)})`;
+                }
 
-        // 1. Video Background Opacity (Fades out as we scroll down)
-        videoBg.style.opacity = 1 - progress;
+                // Utility Bar: visible during video, hide/show after
+                const videoSectionHeight = windowHeight * 0.85;
+                if (currentScrollY < videoSectionHeight) {
+                    topBar.classList.add('visible');
+                } else {
+                    if (currentScrollY < lastScrollY) {
+                        topBar.classList.add('visible');
+                    } else if (currentScrollY > lastScrollY) {
+                        topBar.classList.remove('visible');
+                    }
+                }
 
-        // 2. White Content Section Opacity/Appearance
-        contentSection.style.opacity = Math.max(0, (progress - 0.3) * 1.43);
-        if (progress >= 0.7) {
-            contentSection.style.opacity = 1;
-        }
-
-        // 3. Main Title: Fades out quickly as we scroll (disappears before top bar is visible)
-        // Fade out completely within the first 40% of scroll
-        const titleOpacity = Math.max(0, 1 - (progress * 3));
-        mainTitle.style.opacity = titleOpacity;
-
-        // Dynamic text color based on background:
-        // Start: White (#ffffff) on dark video background -> RGB(255, 255, 255)
-        // End: Dark (#1a1a1a) as white content appears -> RGB(26, 26, 26)
-        const startColor = { r: 255, g: 255, b: 255 };
-        const endColor = { r: 26, g: 26, b: 26 };
-
-        const r = Math.round(startColor.r + (endColor.r - startColor.r) * progress);
-        const g = Math.round(startColor.g + (endColor.g - startColor.g) * progress);
-        const b = Math.round(startColor.b + (endColor.b - startColor.b) * progress);
-
-        mainTitle.style.color = `rgb(${r}, ${g}, ${b})`;
-
-        // Also hide the container entirely once faded
-        if (progress > 0.35) {
-            titleContainer.style.visibility = 'hidden';
-        } else {
-            titleContainer.style.visibility = 'visible';
-        }
-
-        // 4. Top Bar: Fades in with scroll progress
-        topBar.style.opacity = progress;
-        if (progress > 0.1) {
-            topBar.classList.add('visible');
-        } else {
-            topBar.classList.remove('visible');
+                lastScrollY = currentScrollY;
+                ticking = false;
+            });
+            ticking = true;
         }
     });
 
-    // Trigger once on load to set initial state
-    window.dispatchEvent(new Event('scroll'));
+    // ── Smooth scroll for anchor links ──
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const targetElement = document.querySelector(this.getAttribute('href'));
+            if (targetElement) {
+                targetElement.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+    });
 
-    console.log('Project Aegis: Initialized');
+    // ── "Start with it" Expressive Typography Transition ──
+    const startBtn = document.getElementById('start-with-it-btn');
+    if (startBtn) {
+        startBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const href = startBtn.getAttribute('href');
+            const overlay = document.createElement('div');
+            overlay.className = 'page-transition-overlay';
+            const textEl = document.createElement('div');
+            textEl.className = 'transition-text';
+            'AI Asteroid Defence'.split('').forEach((char, i) => {
+                const span = document.createElement('span');
+                span.className = 'char';
+                span.textContent = char === ' ' ? '\u00A0' : char;
+                span.style.animationDelay = `${i * 0.05}s`;
+                textEl.appendChild(span);
+            });
+            overlay.appendChild(textEl);
+            document.body.appendChild(overlay);
+            requestAnimationFrame(() => overlay.classList.add('active'));
+            setTimeout(() => { window.location.href = href; }, 1500); // slightly longer due to longer text array
+        });
+    }
+
+    window.dispatchEvent(new Event('scroll'));
+    console.log('AI Asteroid Defence UI loaded.');
 });

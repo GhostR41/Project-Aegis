@@ -1,178 +1,387 @@
 :root {
-  --font-main: 'JetBrains Mono', monospace;
   --color-pale-white: #f0f0f5;
   --color-peach: #FFDAB9;
   --color-dark-final: #02040a;
-  /* "blue-darkblue-minimal red-black" approximation: Very dark, almost black blue */
+  --color-bg: #000;
+  --color-nav-bg: rgba(22, 22, 22, 0.85);
+
+  --font-body: 'DM Mono', monospace;
+  --font-sub: 'Public Sans', sans-serif;
+  --font-head: 'Inter', sans-serif;
+  --font-title: 'Space Grotesk', sans-serif; /* Fallback for MBF Space Font */
 }
 
+/* Custom Cursor */
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  cursor: none !important;
 }
 
-html,
-body {
+#custom-cursor {
+  position: fixed;
+  width: 36px;
+  height: 36px;
+  background-image: url('/cursor/asteroid.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  pointer-events: none;
+  z-index: 99999;
+  transform: translate(-50%, -50%);
+  transition: transform 0.08s ease-out;
+  will-change: transform, left, top;
+}
+
+/* Page Transition Overlay */
+.page-transition-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: #000;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.6s ease;
+}
+
+.page-transition-overlay.active {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.transition-text {
+  font-family: var(--font-title);
+  font-size: clamp(3rem, 8vw, 7rem);
+  color: #fff;
+  letter-spacing: 0.1em;
+  text-align: center;
+  overflow: hidden;
+}
+
+.transition-text .char {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(100%) rotateX(-90deg);
+  animation: charReveal 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes charReveal {
+  to {
+    opacity: 1;
+    transform: translateY(0) rotateX(0deg);
+  }
+}
+
+html, body {
   width: 100%;
-  /* Do not force height 100% or overflow hidden here, allow natural window scroll */
-  min-height: 100vh;
-  font-family: var(--font-main);
-  background-color: #000;
-  color: var(--color-pale-white);
-  margin: 0;
   padding: 0;
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font-body);
+  background-color: var(--color-bg);
+  color: var(--color-pale-white);
+  overflow-x: hidden;
+  scroll-behavior: smooth;
 }
 
-/* Hide Scrollbar globally but allow scrolling */
+/* Hide Scrollbar */
 html {
   scrollbar-width: none;
-  /* Firefox */
   -ms-overflow-style: none;
-  /* IE 10+ */
 }
 
-/* Chrome/Safari */
-html::-webkit-scrollbar {
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
   display: none;
   width: 0;
   height: 0;
 }
 
-body::-webkit-scrollbar {
-  display: none;
-}
-
-/* Top Bar - Grey, fades in with scroll */
+/* Utility Bar - Pill shape, floating */
 #top-bar {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 80px;
-  background-color: #2a2a2a;
-  /* Grey */
+  top: 30px;
+  left: 50%;
+  transform: translate(-50%, -150%); /* Hidden initially */
+  width: 90%;
+  max-width: 1000px;
+  height: 60px;
+  background-color: var(--color-nav-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   z-index: 100;
   opacity: 0;
-  /* Starts invisible, fades in */
-  transition: opacity 0.4s ease-out;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease-out;
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  padding: 0 10px 0 30px;
+  border-radius: 40px; /* Smooth circular edges */
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
+/* State when bar is visible (scrolling up) */
 #top-bar.visible {
+  transform: translate(-50%, 0);
   opacity: 1;
 }
 
-#bar-title {
-  font-family: var(--font-main);
-  font-size: clamp(1.2rem, 3vw, 2rem);
-  font-weight: 400;
-  letter-spacing: 0.15em;
-  color: #4FC3F7;
-  /* Cyan blue */
+.nav-left #bar-title {
+  font-family: var(--font-title);
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-/* Video Background */
-.video-background {
-  position: fixed;
-  top: 0;
-  left: 0;
+/* Add an icon before the title (like Pumpkin logo in ref) */
+.nav-left #bar-title::before {
+  content: "";
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  background: #ff5e3a; /* Accent color */
+  border-radius: 4px;
+  transform: rotate(45deg);
+}
+
+.nav-center {
+  display: flex;
+  gap: 35px;
+}
+
+.nav-center a {
+  color: #a0a0a0;
+  text-decoration: none;
+  font-family: var(--font-sub);
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.nav-center a:hover {
+  color: #fff;
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+}
+
+.nav-btn-highlight {
+  background-color: #f4f4f4;
+  color: #000;
+  padding: 12px 24px;
+  border-radius: 25px; /* Pill button inside pill nav */
+  text-decoration: none;
+  font-family: var(--font-head);
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: opacity 0.3s ease, transform 0.2s ease;
+}
+
+.nav-btn-highlight:hover {
+  opacity: 0.85;
+  transform: scale(0.98);
+}
+
+/* Video Wrapper */
+.video-container-wrapper {
+  position: relative;
   width: 100vw;
   height: 100vh;
-  z-index: 1;
-  /* Above body background */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #000;
+  z-index: 2;
   overflow: hidden;
-  pointer-events: none;
 }
 
+.video-background {
+  position: relative;
+  width: 95vw;
+  height: 90vh; /* creates space around the video */
+  border-radius: 40px; /* curved rectangular shape */
+  overflow: hidden;
+  box-shadow: 0 0 60px rgba(0, 0, 0, 0.8);
+  /* Optional: faint border to make it pop */
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  background-color: #111;
+}
+
+/* Make iframe cover the container */
 .video-background iframe {
   position: absolute;
   top: 50%;
   left: 50%;
-  /* Cover the viewport maintaining aspect ratio */
   width: 100vw;
-  height: 56.25vw;
-  /* 16:9 */
+  height: 56.25vw; /* 16:9 */
   min-height: 100vh;
-  min-width: 177.78vh;
-  /* 16:9 */
+  min-width: 177.78vh; /* 16:9 */
   transform: translate(-50%, -50%);
   border: none;
-}
-
-/* Ensure centering of text */
-#title-container {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 10;
-  /* Above video */
   pointer-events: none;
 }
 
-#main-title {
-  font-size: clamp(2rem, 5vw, 5rem);
-  font-weight: 100;
-  letter-spacing: 0.2em;
-  color: #ffffff;
-  /* Multi-layer shadow for visibility on any background */
-  text-shadow:
-    /* Dark outline effect */
-    -1px -1px 0 rgba(0, 0, 0, 0.7),
-    1px -1px 0 rgba(0, 0, 0, 0.7),
-    -1px 1px 0 rgba(0, 0, 0, 0.7),
-    1px 1px 0 rgba(0, 0, 0, 0.7),
-    /* Soft glow for extra contrast */
-    0 0 10px rgba(0, 0, 0, 0.8),
-    0 0 20px rgba(0, 0, 0, 0.5),
-    0 0 40px rgba(0, 0, 0, 0.3);
-  transition: opacity 0.3s ease-out;
-}
-
-/* Scroll Structure */
-.scroll-container {
-  position: relative;
-  width: 100%;
-  z-index: 1;
-}
-
-.hero-spacer {
-  height: 100vh;
-  /* Takes up the first screen so we see the video */
-  width: 100%;
-}
-
-.content-section {
-  position: relative;
-  min-height: 200vh;
-  /* Long enough to scroll */
-  background-color: #fff;
-  color: var(--color-dark-final);
-  z-index: 5;
-  opacity: 0;
-  /* Starts hidden, fades in or slides up */
-  display: flex;
-  justify-content: center;
-  padding-top: 150px;
-  /* Space for the title which will move to top */
-}
-
-.content-wrapper {
-  max-width: 800px;
-  width: 80%;
+#title-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  pointer-events: none;
   text-align: center;
 }
 
-.fade-in-text {
+#main-title {
+  font-family: var(--font-title);
+  font-size: clamp(3rem, 7vw, 7rem);
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 0.05em;
+  text-shadow: 0 0 20px rgba(0, 0, 0, 0.5), 0 0 50px rgba(0, 0, 0, 0.3);
+  transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+}
+
+/* Shooting star asteroids */
+.asteroids-layer {
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  z-index: 1; pointer-events: none; overflow: hidden;
+}
+
+.asteroid {
+  position: absolute;
+  width: 50px; height: 1px;
+  background: linear-gradient(90deg, rgba(200,200,255,0), rgba(255,255,255,0.8));
+  border-radius: 50%;
+  animation: shootingStar linear infinite;
+  opacity: 0;
+  filter: drop-shadow(0 0 2px rgba(255,255,255,0.5));
+}
+
+.asteroid::after {
+  content: '';
+  position: absolute;
+  right: -1px;
+  top: -1px;
+  width: 3px;
+  height: 3px;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 4px 1px rgba(255,255,255,0.8);
+}
+
+@keyframes shootingStar {
+  0% { transform: rotate(45deg) translateX(-10vw); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: rotate(45deg) translateX(150vw); opacity: 0; }
+}
+
+.a1 { top: -10vh; left: 20%; animation-duration: 7s; animation-delay: 0s; }
+.a2 { top: 30vh; left: -10%; animation-duration: 12s; animation-delay: 2s; }
+.a3 { top: -20vh; left: 50%; animation-duration: 9s; animation-delay: 5s; }
+.a4 { top: 60vh; left: -20%; animation-duration: 15s; animation-delay: 1s; }
+.a5 { top: -10vh; left: 80%; animation-duration: 10s; animation-delay: 7s; }
+
+/* Scrolling Content Below Video */
+.scroll-container {
+  position: relative;
+  z-index: 5;
+  background-color: transparent;
+}
+
+/* Footer styling */
+.site-deadend {
+  width: 100%;
+  padding: 100px 5% 50px 5%;
+  background-color: #08080a;
+  color: #fff;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  position: relative;
+  z-index: 10;
+}
+
+.footer-left h3 {
+  font-family: var(--font-title);
+  font-size: 2rem;
+  margin-bottom: 20px;
+  color: #f4f4f4;
+}
+
+.footer-left p {
+  font-family: var(--font-head);
   font-size: 1.5rem;
-  margin-bottom: 2rem;
-  font-weight: 400;
+  color: #ccc;
+  margin-bottom: 10px;
+  line-height: 1.5;
+  font-weight: 300;
+}
+
+.footer-left .email {
+  font-family: var(--font-body);
+  color: #777;
+  font-size: 1.1rem;
+}
+
+.footer-right {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  font-family: var(--font-body);
+  align-items: flex-end;
+  text-align: right;
+  font-size: 1.1rem;
+}
+
+.credit-row {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 15px;
+  align-items: center;
+  width: auto;
+}
+
+.credit-name {
+  text-align: right;
+  color: #fff;
+  font-family: var(--font-head);
+  font-weight: 600;
+}
+
+.credit-divider {
+  color: #555;
+  font-family: var(--font-mono);
+}
+
+.credit-role {
+  text-align: left;
+  color: #aaa;
+  font-family: var(--font-mono);
+}
+
+.footer-bottom {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  margin-top: 120px;
+  padding-top: 30px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  color: #555;
 }
