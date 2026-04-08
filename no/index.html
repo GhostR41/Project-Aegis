@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Project: 𝙰𝚎𝚐𝚒𝚜</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Inter:wght@100..900&family=Public+Sans:ital,wght@0,100..900;1,100..900&family=Space+Grotesk:wght@300..700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+</head>
+
+<body>
+  <!-- Custom Cursor -->
+  <div id="custom-cursor"></div>
+  <!-- Top Bar with Title -->
+  <nav id="top-bar" class="utility-bar">
+    <div class="nav-left">
+      <span id="bar-title">Project: 𝙰𝚎𝚐𝚒𝚜</span>
+    </div>
+    <div class="nav-center">
+      <a href="#inspiration">Inspiration</a>
+      <a href="#about">About this project</a>
+      <a href="#how-this-helps">How this helps</a>
+    </div>
+    <div class="nav-right">
+      <a href="/working-soon.html" class="nav-btn-highlight" id="start-with-it-btn">Start with it</a>
+    </div>
+  </nav>
+
+  <!-- Video Background Container (Forms first full section) -->
+  <div class="video-container-wrapper">
+    <div class="video-background" id="video-bg">
+      <iframe id="yt-video"
+        src="https://www.youtube.com/embed/Qsd8LwscwP4?autoplay=1&mute=1&controls=0&loop=1&playlist=Qsd8LwscwP4&playsinline=1&modestbranding=1&showinfo=0&rel=0&iv_load_policy=3&disablekb=1&enablejsapi=1&origin=http://localhost:5173"
+        frameborder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        referrerpolicy="no-referrer-when-downgrade"
+        loading="eager"
+        allowfullscreen>
+      </iframe>
+    </div>
+    <!-- Main Title (Centered over video) -->
+    <div id="title-container">
+      <h1 id="main-title">Project: 𝙰𝚎𝚐𝚒𝚜</h1>
+    </div>
+  </div>
+
+  <!-- Asteroids Field (Visible behind transparent content) -->
+  <div class="asteroids-layer">
+    <div class="asteroid a1"></div>
+    <div class="asteroid a2"></div>
+    <div class="asteroid a3"></div>
+    <div class="asteroid a4"></div>
+    <div class="asteroid a5"></div>
+  </div>
+
+  <!-- Scroll Container -->
+  <div class="scroll-container">
+    <!-- Earth split section -->
+    <div class="earth-section-container">
+      <div class="content-panel left-panel">
+        <section id="inspiration" class="content-section">
+          <h2>Inspiration</h2>
+          <p>Our inspiration stems from the desire to bridge the gap between complex orbital mechanics and accessible
+            visualization. We wanted to create a space where data becomes a navigable, intuitive experience rather than
+            just raw numbers.</p>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <section id="about" class="content-section">
+          <h2>About this project</h2>
+          <p>Project Aegis is an advanced interface for orbital and systems analysis. It integrates cutting-edge
+            visualization with real-time data feeds to simulate and interpret environments seamlessly.</p>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <section id="how-this-helps" class="content-section">
+          <h2>How this helps</h2>
+          <p>By providing a transparent, accurate, and easy-to-use platform, we aim to heighten global awareness,
+            readiness, and strategic planning capabilities for complex systems and potential events.</p>
+        </section>
+      </div>
+
+      <div class="earth-sticky-panel right-panel">
+        <div class="earth-image-wrapper">
+          <img src="/earth.png" alt="Rotating Earth" class="rotating-earth" />
+        </div>
+      </div>
+    </div>
+
+    <!-- DART Satellite Section -->
+    <div class="dart-section-container">
+      <div class="dart-sticky-panel left-panel">
+        <div class="dart-image-wrapper">
+          <img src="/media/dart/satellite.png" alt="DART Spacecraft" style="width: 100%; height: auto; object-fit: contain;" />
+          <!-- Diagram Labels (Appear when scrolling to specific sections) -->
+          <div class="diagram-label label-draco">
+            <div class="label-text" style="text-align: right; padding-right: 15px;">
+              <h4>DRACO SENSOR</h4>
+              <p>Optical Navigation Camera</p>
+            </div>
+            <div class="label-line" style="margin-left: 0; margin-right: 0;"></div>
+          </div>
+          <div class="diagram-label label-impact">
+            <div class="label-line" style="margin-left: 0; margin-right: 0;"></div>
+            <div class="label-text" style="text-align: left; padding-left: 15px;">
+              <h4>KINETIC IMPACTOR</h4>
+              <p>High velocity deflection mass</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="content-panel right-panel">
+        <section class="content-section">
+          <h2>NASA DART Mission</h2>
+          <p>The Double Asteroid Redirection Test (DART) was the first-ever mission dedicated to investigating and
+            demonstrating one method of asteroid deflection by changing an asteroid's motion in space through kinetic
+            impact.</p>
+        </section>
+        
+        <div class="section-divider"></div>
+
+        <section class="content-section" id="dart-sensor-trigger">
+          <h2>Advanced Targeting</h2>
+          <p>DART's solely carried instrument, DRACO (Didymos Reconnaissance and Asteroid Camera for Optical
+            navigation), captured images of the asteroid Didymos and its moonlet Dimorphos to support the spacecraft's
+            autonomous guidance system.</p>
+        </section>
+      </div>
+    </div>
+
+    <!-- Hero Section: Asteroid Incidents ──────────────────────── -->
+    <div class="incidents-hero">
+      <div class="incidents-bg" id="incidents-bg"></div>
+      <div class="incidents-header">
+        <h2 class="incidents-title">Too Late to Act</h2>
+        <p class="incidents-subtitle">Recent incidents where asteroids were discovered too late — a stark reminder of why planetary defense matters.</p>
+      </div>
+
+      <div class="incidents-grid">
+        <!-- Card 1: Chelyabinsk 2013 -->
+        <div class="incident-card" data-speed="0.06">
+          <div class="incident-img-box">
+            <img src="/media/incidents/chelyabinsk.png" alt="Chelyabinsk Meteor 2013" />
+          </div>
+          <div class="incident-info">
+            <span class="incident-date">February 15, 2013</span>
+            <h3>Chelyabinsk Meteor</h3>
+            <p>An 18-meter asteroid exploded over Chelyabinsk, Russia at 30 km altitude. The shockwave damaged 7,200 buildings and injured 1,500 people. It was completely undetected before entry.</p>
+          </div>
+        </div>
+
+        <!-- Card 2: 2019 OK -->
+        <div class="incident-card" data-speed="-0.04">
+          <div class="incident-img-box">
+            <img src="/media/incidents/2019ok.png" alt="Asteroid 2019 OK" />
+          </div>
+          <div class="incident-info">
+            <span class="incident-date">July 25, 2019</span>
+            <h3>Asteroid 2019 OK</h3>
+            <p>A 100-meter "city killer" asteroid flew past Earth at just 65,000 km — one-fifth the distance to the Moon. It was discovered only hours before its closest approach, coming from the Sun's direction.</p>
+          </div>
+        </div>
+
+        <!-- Card 3: 2008 TC3 -->
+        <div class="incident-card" data-speed="0.08">
+          <div class="incident-img-box">
+            <img src="/media/incidents/2008tc3.png" alt="Asteroid 2008 TC3" />
+          </div>
+          <div class="incident-info">
+            <span class="incident-date">October 7, 2008</span>
+            <h3>Asteroid 2008 TC3</h3>
+            <p>Discovered just 20 hours before impact, this 4-meter asteroid exploded 37 km above Sudan's Nubian Desert. The first asteroid ever predicted to hit Earth — but barely in time.</p>
+          </div>
+        </div>
+
+        <!-- Card 4: 2023 CX1 -->
+        <div class="incident-card" data-speed="-0.05">
+          <div class="incident-img-box">
+            <img src="/media/incidents/2023cx1.png" alt="Asteroid 2023 CX1" />
+          </div>
+          <div class="incident-info">
+            <span class="incident-date">February 13, 2023</span>
+            <h3>Asteroid 2023 CX1</h3>
+            <p>Discovered less than 7 hours before impact by a single Hungarian astronomer. It entered over Normandy, France producing a brilliant fireball visible across the English Channel.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Site Footer / Deadend -->
+    <footer class="site-deadend">
+      <div class="footer-left">
+        <h3 style="display: flex; align-items: center; gap: 10px;">
+          <span style="display:inline-block; width:18px; height:18px; background:#ff5e3a; border-radius:4px; transform:rotate(45deg);"></span>
+          Project: 𝙰𝚎𝚐𝚒𝚜
+        </h3>
+        <p>Speak to your new planetary defense team today.<br>
+        <span class="email">contact@aegis.project</span></p>
+      </div>
+      <div class="footer-right">
+
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 Project Aegis. All rights reserved.</p>
+        <p class="email-bottom">contact@aegis.project</p>
+      </div>
+    </footer>
+
+  </div>
+
+  <script type="module" src="/main.js"></script>
+</body>
+
+</html>

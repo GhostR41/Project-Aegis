@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project: 𝙰𝚎𝚐𝚒𝚜 — Start</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Inter:wght@100..900&family=Public+Sans:ital,wght@0,100..900;1,100..900&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0c0c0e;
+      --card: rgba(30, 30, 34, 0.9);
+      --card-border: rgba(255,255,255,0.06);
+      --accent: #ff5e3a;
+      --text: #f0f0f5;
+      --muted: #777;
+      --font-body: 'DM Mono', monospace;
+      --font-sub: 'Public Sans', sans-serif;
+      --font-head: 'Inter', sans-serif;
+      --font-title: 'Space Grotesk', sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; cursor: none !important; }
+
+    #custom-cursor {
+      position: fixed; width: 36px; height: 36px;
+      background: url('/cursor/asteroid.png') center/contain no-repeat;
+      pointer-events: none; z-index: 99999;
+      transform: translate(-50%, -50%);
+    }
+
+    html, body { width: 100%; height: 100%; font-family: var(--font-body); background: var(--bg); color: var(--text); overflow: hidden; }
+
+    /* ═══════════ NAV BAR ═══════════ */
+    .top-nav {
+      position: fixed; top: 16px; left: 50%; transform: translateX(-50%);
+      width: calc(100% - 40px); max-width: 960px; height: 52px;
+      background: linear-gradient(90deg, rgba(255, 94, 58, 0.25) 0%, rgba(22, 22, 22, 0.88) 35%);
+      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+      border-radius: 32px; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 8px 0 22px;
+      border: 1px solid var(--card-border);
+      box-shadow: 0 6px 30px rgba(0,0,0,0.5);
+    }
+    .nav-l { display: flex; align-items: center; gap: 8px; font-family: var(--font-body); font-weight: 500; font-size: 1rem; color: #fff; letter-spacing: 0.02em; }
+    .nav-l .dot { width: 13px; height: 13px; background: var(--accent); border-radius: 3px; transform: rotate(45deg); }
+    .nav-m { display: flex; gap: 28px; }
+    .nav-m a { text-decoration: none; color: var(--muted); font-family: var(--font-sub); font-size: 0.88rem; font-weight: 500; transition: color 0.3s; }
+    .nav-m a:hover { color: #fff; }
+    .nav-r a { background: #f4f4f4; color: #000; padding: 9px 20px; border-radius: 22px; text-decoration: none; font-family: var(--font-head); font-weight: 600; font-size: 0.82rem; transition: opacity 0.3s; }
+    .nav-r a:hover { opacity: 0.85; }
+
+    /* ═══════════ INTRO SCREEN ═══════════ */
+    #intro {
+      position: fixed; inset: 0; background: #000;
+      display: flex; align-items: center; justify-content: center;
+      z-index: 50;
+      transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    #intro.out { opacity: 0; transform: scale(1.08); pointer-events: none; }
+
+    .circle-wrap { position: relative; width: 340px; height: 340px; }
+    .circle-wrap svg { width: 100%; height: 100%; }
+    .spin-g { animation: sp 10s linear infinite; transform-origin: 200px 200px; }
+    @keyframes sp { to { transform: rotate(360deg); } }
+
+    .play-circle {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+      width: 90px; height: 90px; border-radius: 50%;
+      background: rgba(255,255,255,0.07);
+      backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.12);
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.3s, transform 0.3s;
+    }
+    .play-circle:hover { background: rgba(255,255,255,0.14); transform: translate(-50%,-50%) scale(1.08); }
+    .play-circle svg { width: 24px; height: 24px; fill: #fff; margin-left: 3px; }
+
+    /* ═══════════ TRANSITION ═══════════ */
+    #transition {
+      position: fixed; inset: 0; background: #000; z-index: 60;
+      display: none; align-items: center; justify-content: center; flex-direction: column; gap: 24px;
+    }
+    #transition.on { display: flex; }
+    .t-rings { position: relative; width: 100px; height: 100px; }
+    .t-ring { position: absolute; border: 2px solid rgba(255,255,255,0.15); border-radius: 50%; animation: rng 1.8s ease-out infinite; }
+    .t-ring:nth-child(1) { width: 30px; height: 30px; top: 35px; left: 35px; }
+    .t-ring:nth-child(2) { width: 60px; height: 60px; top: 20px; left: 20px; animation-delay: 0.35s; }
+    .t-ring:nth-child(3) { width: 90px; height: 90px; top: 5px; left: 5px; animation-delay: 0.7s; }
+    @keyframes rng { 0% { transform: scale(0.6); opacity: 1; border-color: var(--accent); } 100% { transform: scale(2.2); opacity: 0; } }
+    .t-label { font-family: var(--font-title); font-size: 1.4rem; color: #fff; letter-spacing: 0.12em; opacity: 0; animation: fadeUp 0.8s ease forwards 0.3s; }
+    @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } from { transform: translateY(16px); } }
+
+    /* ═══════════ DASHBOARD ═══════════ */
+    #dash {
+      width: 100vw; height: 100vh;
+      display: none; flex-direction: column;
+      padding-top: 84px;
+    }
+    #dash.on { display: flex; }
+
+    .grid {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 7fr 3fr;
+      gap: 20px;
+      padding: 0 24px 24px 24px;
+      overflow: hidden;
+      height: calc(100vh - 84px);
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 28px;
+      border: 1px solid var(--card-border);
+      position: relative;
+      overflow: hidden;
+      opacity: 0;
+      transform: translateY(24px);
+    }
+    .card.show { animation: cUp 0.7s cubic-bezier(0.16,1,0.3,1) forwards; }
+    @keyframes cUp { to { opacity: 1; transform: translateY(0); } }
+
+    /* Left Column Outer Card */
+    .c-left-main {
+      grid-column: 1;
+      background: rgba(22, 22, 24, 0.6);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    /* Light Grey Display Screen */
+    .display-screen {
+      margin: 16px 16px 0 16px;
+      padding: 24px;
+      height: calc(100% - 150px);
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-y: auto;
+      scrollbar-width: none;
+    }
+    .display-screen::-webkit-scrollbar { display: none; }
+    
+    .idle-hint {
+      margin-top: 15vh;
+      font-family: var(--font-sub);
+      font-size: 1.05rem;
+      color: rgba(255,255,255,0.35);
+      text-align: center;
+      line-height: 1.6;
+      transition: opacity 0.3s ease;
+    }
+
+    /* Dark Input Panel */
+    .input-panel {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: transparent;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      padding: 0 16px 16px 16px;
+    }
+
+    .inp-container {
+      background: rgba(18, 18, 20, 0.95);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 24px;
+      padding: 18px 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      box-shadow: 0 -4px 30px rgba(0,0,0,0.3);
+      transition: border-color 0.4s ease;
+    }
+
+    .inp-box {
+      width: 100%;
+      background: transparent;
+      border: none;
+      font-family: var(--font-sub);
+      font-size: 0.95rem;
+      color: var(--text);
+      outline: none;
+      resize: none;
+      min-height: 24px;
+      max-height: 160px;
+      overflow-y: auto;
+      scrollbar-width: none;
+      line-height: 1.5;
+    }
+    .inp-box::-webkit-scrollbar { display: none; }
+    .inp-box::placeholder { color: rgba(255,255,255,0.25); }
+
+    .pill-group {
+      display: flex;
+      gap: 10px;
+    }
+
+    .pill-btn {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px;
+      color: #888;
+      font-family: var(--font-sub);
+      font-size: 0.8rem;
+      padding: 10px 18px;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    .pill-btn:hover { 
+      background: rgba(255,255,255,0.06); 
+      color: #ddd; 
+      border-color: rgba(255,255,255,0.15);
+    }
+    .pill-btn.active {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(220, 235, 255, 0.4);
+      color: #fff;
+      box-shadow: 
+        0 0 15px rgba(220, 235, 255, 0.12), 
+        inset 0 0 8px rgba(255, 255, 255, 0.04);
+    }
+
+    /* Right Column Card */
+    .c2-right {
+      grid-column: 2;
+      display: flex;
+      flex-direction: column;
+      padding: 36px 32px;
+      background: rgba(22, 22, 24, 0.8);
+      border-radius: 28px;
+      align-items: flex-start;
+    }
+
+    .wf-section {
+      width: 100%;
+      margin-bottom: 36px;
+    }
+    .wf-title {
+      font-family: var(--font-body);
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 20px;
+    }
+
+    .wf-stage {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 18px;
+      opacity: 0.3;
+      transition: opacity 0.4s ease;
+    }
+    .wf-stage.active { opacity: 1; }
+    .wf-stage.complete { opacity: 0.7; }
+    
+    .stage-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: transparent;
+      border: 1px solid #777;
+      transition: all 0.4s ease;
+    }
+    .wf-stage.active .stage-dot {
+      background: #fff;
+      border-color: #fff;
+      box-shadow: 0 0 10px rgba(255,255,255,0.4);
+    }
+    .wf-stage.complete .stage-dot {
+      background: #777;
+      border-color: #777;
+    }
+    .stage-label {
+      font-family: var(--font-sub);
+      font-size: 0.95rem;
+      color: #fff;
+    }
+    
+    .wf-status {
+      margin-top: auto;
+      padding-top: 24px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      width: 100%;
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      color: var(--accent);
+      letter-spacing: 0.05em;
+    }
+  </style>
+</head>
+<body>
+  <div id="custom-cursor"></div>
+
+  <!-- ───── NAV (always visible) ───── -->
+  <nav class="top-nav">
+    <div class="nav-l"><div class="dot"></div><span>Project: Aegis</span></div>
+    <div class="nav-m">
+      <a href="/#inspiration">Inspiration</a>
+      <a href="/#about">About this project</a>
+      <a href="/#how-this-helps">How this helps</a>
+    </div>
+    <div class="nav-r"><a href="/" id="home-btn">Home</a></div>
+  </nav>
+
+  <!-- ───── INTRO ───── -->
+  <div id="intro">
+    <div class="circle-wrap">
+      <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+        <defs><path id="cp" d="M200,200 m-160,0 a160,160 0 1,0 320,0 a160,160 0 1,0 -320,0" fill="none"/></defs>
+        <g class="spin-g">
+          <text fill="white" font-family="Inter, -apple-system, sans-serif" font-size="20" font-weight="500" letter-spacing="1.5">
+            <textPath href="#cp" startOffset="0%">— Autonomous Planetary Defence Assistant №⁜※ — Autonomous Planetary Defence Assistant №⁜※</textPath>
+          </text>
+        </g>
+      </svg>
+      <div class="play-circle" id="play-btn">
+        <svg viewBox="0 0 24 24"><polygon points="7,4 20,12 7,20"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- ───── TRANSITION ───── -->
+  <div id="transition">
+    <div class="t-rings"><div class="t-ring"></div><div class="t-ring"></div><div class="t-ring"></div></div>
+    <div class="t-label">Initializing Autonomous Systems</div>
+  </div>
+
+  <!-- ───── DASHBOARD ───── -->
+  <div id="dash">
+    <div class="grid">
+      <div class="card c-left-main">
+        <div class="display-screen" id="chat-canvas">
+          <div class="idle-hint" id="idle-text">
+            System ready.<br>Awaiting telemetry or operator input.
+          </div>
+        </div>
+        <div class="input-panel">
+          <div class="inp-container" id="inp-container">
+            <textarea class="inp-box" id="main-input" placeholder="Initiate sequence..." rows="1"></textarea>
+            <div class="pill-group">
+              <div class="pill-btn mode-chip active" data-mode="answer">+ Answer</div>
+              <div class="pill-btn mode-chip" data-mode="assess">+ Assess threat level</div>
+              <div class="pill-btn mode-chip" data-mode="plan">+ Generate deflection plan</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card c2-right">
+        <div class="wf-section">
+          <div class="wf-title">Current Phase</div>
+          <div class="stage-label" id="current-mode-label">General Query</div>
+        </div>
+        
+        <div class="wf-section">
+          <div class="wf-title">Orchestration</div>
+          <div class="wf-stage" id="stage-1">
+            <div class="stage-dot"></div>
+            <div class="stage-label">Agent 1: Database Intel</div>
+          </div>
+          <div class="wf-stage" id="stage-2">
+            <div class="stage-dot"></div>
+            <div class="stage-label">Agent 2: Strategic Plan</div>
+          </div>
+          <div class="wf-stage" id="stage-3">
+            <div class="stage-dot"></div>
+            <div class="stage-label">Agent 3: Safety Veto</div>
+          </div>
+        </div>
+
+        <div class="wf-section" id="approval-section" style="display: none; margin-top: 30px; border-top: 1px solid rgba(255, 94, 58, 0.2); padding-top: 20px;">
+          <div class="wf-title" style="color: var(--accent); text-transform: uppercase; font-weight: 800; letter-spacing: 2px;">Authorization Required</div>
+          <p style="font-size: 0.8rem; color: #ccc; margin: 10px 0;">Safety Validator has cleared the mission. Final human override required for execution.</p>
+          <button id="execute-btn" class="pill-btn" style="width: 100%; background: var(--accent); color: #000; font-weight: 900; padding: 15px; margin-top: 10px; cursor: pointer; border: none; border-radius: 8px;">EXECUTE MISSION</button>
+        </div>
+
+        <div class="wf-status" id="system-status">● SYSTEM IDLE</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Cursor
+    const cur = document.getElementById('custom-cursor');
+    document.addEventListener('mousemove', e => { cur.style.left = e.clientX+'px'; cur.style.top = e.clientY+'px'; });
+
+    // Screens
+    const intro = document.getElementById('intro');
+    const trans = document.getElementById('transition');
+    const dash  = document.getElementById('dash');
+
+    document.getElementById('play-btn').addEventListener('click', () => {
+      intro.classList.add('out');
+      setTimeout(() => {
+        intro.style.display = 'none';
+        trans.classList.add('on');
+        setTimeout(() => {
+          trans.classList.remove('on');
+          trans.style.display = 'none';
+          dash.classList.add('on');
+          document.querySelectorAll('.card').forEach((c, i) => {
+            setTimeout(() => c.classList.add('show'), i * 150);
+          });
+        }, 2800);
+      }, 700);
+    });
+
+    // Home
+    document.getElementById('home-btn').addEventListener('click', e => {
+      e.preventDefault();
+      document.body.style.transition = 'opacity 0.4s';
+      document.body.style.opacity = '0';
+      setTimeout(() => location.href = '/', 400);
+    });
+
+    // Composer & Mode Selection
+    const mainInput = document.getElementById('main-input');
+    const idleText = document.getElementById('idle-text');
+    const inpContainer = document.getElementById('inp-container');
+    const chips = document.querySelectorAll('.mode-chip');
+    const modeLabel = document.getElementById('current-mode-label');
+    const stage1 = document.getElementById('stage-1');
+
+    // State management
+    let currentSessionId = null;
+
+    mainInput.addEventListener('input', function() {
+      // Auto-resize
+      this.style.height = 'auto';
+      this.style.height = (this.scrollHeight) + 'px';
+      
+      // Hide empty state hint
+      if (idleText && this.value.trim().length > 0) {
+        idleText.style.opacity = '0';
+        setTimeout(() => idleText.style.display = 'none', 300);
+      }
+    });
+
+    // Mode Selection Logic
+    chips.forEach(chip => {
+      chip.addEventListener('click', () => {
+        const isActive = chip.classList.contains('active');
+        
+        // Deselect all
+        chips.forEach(c => c.classList.remove('active'));
+        
+        if (isActive) {
+          // If it was already active, deselect and revert to default state
+          modeLabel.textContent = 'Awaiting Input';
+          stage1.classList.remove('active');
+          return;
+        }
+
+        // Select clicked
+        chip.classList.add('active');
+        
+        // Update workflow UI based on mode
+        const mode = chip.dataset.mode;
+        if(mode === 'answer') {
+          modeLabel.textContent = 'General Query';
+          stage1.classList.remove('active');
+        } else if(mode === 'assess') {
+          modeLabel.textContent = 'Threat Assessment';
+          stage1.classList.add('active');
+        } else if(mode === 'plan') {
+          modeLabel.textContent = 'Mission Planning';
+          stage1.classList.add('active');
+        }
+
+        // Trigger subtle aura reflex on composer
+        inpContainer.style.borderColor = 'rgba(200, 220, 255, 0.4)';
+        setTimeout(() => {
+          inpContainer.style.borderColor = 'rgba(255,255,255,0.06)';
+        }, 400);
+      });
+    });
+
+    // Helper: Append Message Bubble
+    function appendMessage(text, isUser = false) {
+      const chatCanvas = document.getElementById('chat-canvas');
+      const msgBubble = document.createElement('div');
+      
+      msgBubble.style.alignSelf = isUser ? 'flex-end' : 'flex-start';
+      msgBubble.style.background = isUser ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 94, 58, 0.05)';
+      msgBubble.style.border = isUser ? '1px solid rgba(255, 255, 255, 0.12)' : '1px solid rgba(255, 94, 58, 0.2)';
+      msgBubble.style.padding = '14px 22px';
+      msgBubble.style.borderRadius = isUser ? '24px 24px 6px 24px' : '24px 24px 24px 6px';
+      msgBubble.style.fontFamily = 'var(--font-sub)';
+      msgBubble.style.fontSize = '0.95rem';
+      msgBubble.style.color = '#fff';
+      msgBubble.style.maxWidth = '85%';
+      msgBubble.style.marginBottom = '20px';
+      msgBubble.style.lineHeight = '1.6';
+      msgBubble.style.whiteSpace = 'pre-wrap';
+      
+      msgBubble.innerHTML = text.replace(/\n/g, '<br>');
+      chatCanvas.appendChild(msgBubble);
+      chatCanvas.scrollTop = chatCanvas.scrollHeight;
+      return msgBubble;
+    }
+
+    // Helper: Update Workflow Stages
+    function setWorkflowStage(stage, status) {
+      const el = document.getElementById(`stage-${stage}`);
+      if (!el) return;
+      el.classList.remove('active', 'complete');
+      if (status === 'active') el.classList.add('active');
+      if (status === 'complete') el.classList.add('complete');
+    }
+
+    // Enter & Shift+Enter Logic
+    mainInput.addEventListener('keydown', async function(e) {
+      if (e.key === 'Enter') {
+        if (e.shiftKey) return;
+        
+        e.preventDefault();
+        const promptText = this.value.trim();
+        if (!promptText) return;
+
+        // Mode mapping
+        const activeChip = document.querySelector('.mode-chip.active');
+        const rawMode = activeChip ? activeChip.dataset.mode : 'answer';
+        const apiMode = rawMode === 'assess' ? 'assess_threat' : (rawMode === 'plan' ? 'generate_plan' : 'answer');
+
+        // UI Reset
+        this.value = '';
+        this.style.height = 'auto';
+        if (idleText && idleText.parentNode) idleText.parentNode.removeChild(idleText);
+
+        // Append User Message
+        appendMessage(promptText, true);
+
+        // System Status Update
+        const statusEl = document.getElementById('system-status');
+        statusEl.textContent = '● AGENT PROCESSING...';
+        statusEl.style.color = 'var(--accent)';
+
+        // Loading Bubble
+        const loadingBubble = appendMessage('Analyzing request...');
+        
+        try {
+          // Identify Stages based on mode
+          if (apiMode !== 'answer') setWorkflowStage(1, 'active');
+
+          const response = await fetch('http://localhost:8000/api/process', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ mode: apiMode, query: promptText })
+          });
+
+          if (!response.ok) throw new Error('System link failure');
+          
+          const data = await response.json();
+          currentSessionId = data.session_id;
+          
+          // Remove loading text
+          if (loadingBubble && loadingBubble.parentNode) loadingBubble.parentNode.removeChild(loadingBubble);
+
+          // Update Status & Sidebar
+          statusEl.textContent = '● DATA RECEIVED';
+          statusEl.style.color = '#00ff99';
+          
+          if (apiMode === 'generate_plan' && data.status === 'success') {
+            setWorkflowStage(1, 'complete');
+            setWorkflowStage(2, 'complete');
+            setWorkflowStage(3, 'complete');
+            
+            if (data.workflow_status === 'AWAITING_HUMAN_APPROVAL') {
+              document.getElementById('approval-section').style.display = 'block';
+              statusEl.textContent = '● MISSION HELD for APPROVAL';
+              statusEl.style.color = 'var(--accent)';
+            }
+          } else if (apiMode === 'assess_threat') {
+            setWorkflowStage(1, 'complete');
+          }
+
+          // Handle multi-part output or single string
+          let finalMsg = '';
+          if (data.final_output) {
+            finalMsg = data.final_output;
+          } else if (data.agent_3_validation) {
+            // Orchestration success layout
+            finalMsg = `**ORCHESTRATION SUCCESS**\n\n`;
+            
+            const assData = data.agent_1_threat_data || {};
+            finalMsg += `**[AGENT 1] INTEL:**\nTarget: ${assData.name || 'Unknown'}\nMass: ${assData.mass || 'N/A'}\nVelocity: ${assData.velocity || 'N/A'}\n\n`;
+            
+            const plan = data.agent_2_strategy || {};
+            finalMsg += `**[AGENT 2] STRATEGY:**\nMethod: ${plan.method || 'Propulsion'}\nDelta-V: ${plan.delta_v_required || 'N/A'} m/s\n\n`;
+            
+            const safety = data.agent_3_validation || {};
+            finalMsg += `**[AGENT 3] VALIDATION:**\nVerdict: ${safety.is_approved ? 'APPROVED' : 'REJECTED'}\nRationale: ${safety.raw_output.slice(0, 100)}...\n\n`;
+            
+            if (data.workflow_status === 'AWAITING_HUMAN_APPROVAL') {
+                finalMsg += `**>>> SYSTEM STANDING BY FOR AUTHORIZATION <<<**`;
+            }
+          } else {
+            finalMsg = JSON.stringify(data, null, 2);
+          }
+
+          appendMessage(finalMsg);
+          
+          if (data.workflow_status !== 'AWAITING_HUMAN_APPROVAL') {
+            setTimeout(() => {
+              statusEl.textContent = '● SYSTEM IDLE';
+              statusEl.style.color = 'var(--muted)';
+            }, 3000);
+          }
+
+        } catch (err) {
+          if (loadingBubble && loadingBubble.parentNode) loadingBubble.textContent = `CRITICAL ERROR: ${err.message}`;
+          statusEl.textContent = '● LINK ERROR';
+          statusEl.style.color = '#ff4444';
+        }
+      }
+    });
+
+    // Execute Mission Logic
+    document.getElementById('execute-btn').addEventListener('click', async () => {
+      if (!currentSessionId) return;
+      
+      const statusEl = document.getElementById('system-status');
+      statusEl.textContent = '● AUTHORIZING EXECUTION...';
+      
+      try {
+        const response = await fetch('http://localhost:8000/api/process', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            mode: 'approve_mission', 
+            query: 'AUTHORIZE_EXECUTION',
+            session_id: currentSessionId 
+          })
+        });
+        
+        const data = await response.json();
+        if (data.status === 'success') {
+          appendMessage(`**MISSION EXECUTED**\n\n${data.message}`);
+          document.getElementById('approval-section').style.display = 'none';
+          statusEl.textContent = '● ORBITAL SEQUENCE ACTIVE';
+          statusEl.style.color = '#00ff99';
+        }
+      } catch (err) {
+        appendMessage(`AUTHORIZATION FAILED: ${err.message}`);
+      }
+    });
+  </script>
+</body>
+</html>
