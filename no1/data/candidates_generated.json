@@ -1,0 +1,114 @@
+[
+  {
+    "id": 0,
+    "strategy": "kinetic",
+    "velocity_km_s": 30.71,
+    "angle_degrees": 35.68,
+    "estimated_impact_energy_kt": 0.11
+  },
+  {
+    "id": 1,
+    "strategy": "kinetic",
+    "velocity_km_s": 11.25,
+    "angle_degrees": 10.26,
+    "estimated_impact_energy_kt": 0.02
+  },
+  {
+    "id": 2,
+    "strategy": "kinetic",
+    "velocity_km_s": 14.99,
+    "angle_degrees": 52.14,
+    "estimated_impact_energy_kt": 0.03
+  },
+  {
+    "id": 3,
+    "strategy": "kinetic",
+    "velocity_km_s": 30.53,
+    "angle_degrees": 10.93,
+    "estimated_impact_energy_kt": 0.11
+  },
+  {
+    "id": 4,
+    "strategy": "kinetic",
+    "velocity_km_s": 26.94,
+    "angle_degrees": 30.71,
+    "estimated_impact_energy_kt": 0.09
+  },
+  {
+    "id": 5,
+    "strategy": "kinetic",
+    "velocity_km_s": 10.53,
+    "angle_degrees": 11.33,
+    "estimated_impact_energy_kt": 0.01
+  },
+  {
+    "id": 6,
+    "strategy": "kinetic",
+    "velocity_km_s": 18.38,
+    "angle_degrees": 51.41,
+    "estimated_impact_energy_kt": 0.04
+  },
+  {
+    "id": 7,
+    "strategy": "kinetic",
+    "velocity_km_s": 36.3,
+    "angle_degrees": 43.53,
+    "estimated_impact_energy_kt": 0.16
+  },
+  {
+    "id": 8,
+    "strategy": "kinetic",
+    "velocity_km_s": 24.21,
+    "angle_degrees": 42.85,
+    "estimated_impact_energy_kt": 0.07
+  },
+  {
+    "id": 9,
+    "strategy": "kinetic",
+    "velocity_km_s": 24.1,
+    "angle_degrees": 37.27,
+    "estimated_impact_energy_kt": 0.07
+  },
+  {
+    "id": 10,
+    "strategy": "kinetic",
+    "velocity_km_s": 24.74,
+    "angle_degrees": 41.13,
+    "estimated_impact_energy_kt": 0.07
+  },
+  {
+    "id": 11,
+    "strategy": "kinetic",
+    "velocity_km_s": 31.39,
+    "angle_degrees": 38.22,
+    "estimated_impact_energy_kt": 0.12
+  },
+  {
+    "id": 12,
+    "strategy": "kinetic",
+    "velocity_km_s": 35.58,
+    "angle_degrees": 59.64,
+    "estimated_impact_energy_kt": 0.15
+  },
+  {
+    "id": 13,
+    "strategy": "kinetic",
+    "velocity_km_s": 30.5,
+    "angle_degrees": 16.9,
+    "estimated_impact_energy_kt": 0.11
+  },
+  {
+    "id": 14,
+    "strategy": "kinetic",
+    "velocity_km_s": 16.02,
+    "angle_degrees": 24.88,
+    "estimated_impact_energy_kt": 0.03
+  },
+  {
+    "id": 15,
+    "strategy": "kinetic",
+    "velocity_km_s": 15.8,
+    "angle_degrees": 59.96,
+    "estimated_impact_energy_kt": 0.03
+  }
+]
