@@ -1,6 +1,7 @@
 import json
 import asyncio
 import uuid
+import os
 from typing import Dict, Any, Optional
 from agent_1.agent import handle_agent1_routing
 from agent_2.agent import handle_agent2_planning
@@ -8,6 +9,18 @@ from agent_3.agent import handle_agent3_validation
 from dotenv import load_dotenv
 
 load_dotenv()
+
+# Support multiple API keys to avoid TPM rate limits
+def set_agent_api_key(agent_num: int):
+    """Set GROQ_API_KEY env var to agent-specific key if available, else use default."""
+    key_var = f"GROQ_API_KEY_{agent_num}"
+    if key_var in os.environ:
+        os.environ["GROQ_API_KEY"] = os.environ[key_var]
+        print(f"  [Orchestrator] Using {key_var} for Agent {agent_num}")
+    elif agent_num > 1:
+        # Fall back to default key
+        os.environ["GROQ_API_KEY"] = os.environ.get("GROQ_API_KEY", "")
+        print(f"  [Orchestrator] {key_var} not found, using default GROQ_API_KEY for Agent {agent_num}")
 
 # Simple ephemeral state store for the demo
 MISSION_STATE = {}
@@ -84,10 +97,16 @@ async def process_request(mode: str, query: str, session_id: Optional[str] = Non
 
         # Phase 2
         print("-> Agent 2: Strategic Planning")
+        print("  [Orchestrator] Waiting 15s before Agent 2 (TPM rate limit reset for shared organization)...")
+        await asyncio.sleep(15)
+        set_agent_api_key(2)
         a2_res = await handle_agent2_planning(str(a1_raw))
 
         # Phase 3
         print("-> Agent 3: Safety Validation")
+        print("  [Orchestrator] Waiting 15s before Agent 3 (TPM rate limit reset for shared organization)...")
+        await asyncio.sleep(15)
+        set_agent_api_key(3)
         a3_res = await handle_agent3_validation(a2_res)
 
         # HITL Logic
