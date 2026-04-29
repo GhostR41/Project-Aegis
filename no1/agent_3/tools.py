@@ -102,11 +102,13 @@ def evaluate_safety_score(
     safety_score = len(checks_passed) / (len(checks_passed) + len(checks_failed))
     
     recommendation = "APPROVE" if not checks_failed else "REJECT"
-    
+    rejection_reason = "" if not checks_failed else ", ".join(checks_failed)
+
     return {
         "safety_score": round(safety_score, 2),
         "recommendation": recommendation,
         "checks_passed": checks_passed,
         "checks_failed": checks_failed,
         "is_approved": recommendation == "APPROVE"
+        ,"rejection_reason": rejection_reason
     }

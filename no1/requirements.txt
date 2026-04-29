@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+python-dotenv
+litellm
+pydantic
+SQLAlchemy
+PyMySQL
+numpy
+scipy
+numba
+# Use cupy-cuda12x for CUDA 12.x systems, or cupy-cuda11x if your CUDA stack is 11.x.
+cupy-cuda12x

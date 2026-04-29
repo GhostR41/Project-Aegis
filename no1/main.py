@@ -2,10 +2,13 @@ import json
 import asyncio
 import uuid
 import os
+from datetime import datetime
 from typing import Dict, Any, Optional
 from agent_1.agent import handle_agent1_routing
 from agent_2.agent import handle_agent2_planning
+from agent_2 import tools as agent2_tools
 from agent_3.agent import handle_agent3_validation
+from shared import dbtool, database
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -60,6 +63,7 @@ async def process_request(mode: str, query: str, session_id: Optional[str] = Non
     """
     if not session_id:
         session_id = str(uuid.uuid4())
+    started_at = datetime.utcnow().isoformat() + "Z"
     
     print(f"\n--- Aegis Orchestration (ID: {session_id}) ---")
     
@@ -95,12 +99,31 @@ async def process_request(mode: str, query: str, session_id: Optional[str] = Non
         if "apologize" in str(a1_raw).lower() or "cannot assist" in str(a1_raw).lower():
             return {"final_output": a1_raw, "status": "refused", "session_id": session_id}
 
+        asteroid_id = 0
+        strategy_id = 0
+        pre_db_gen = database.get_db()
+        pre_db = next(pre_db_gen)
+        try:
+            asteroid_id = dbtool.ensure_asteroid(pre_db, a1_data, fallback_name="Agent 1 Asteroid")
+            strategy_id = dbtool.ensure_strategy(pre_db, asteroid_id, method="kinetic", status="Proposed")
+            pre_db.commit()
+        except Exception as exc:
+            pre_db.rollback()
+            print(f"[Orchestrator] Pre-strategy initialization failed: {exc}")
+        finally:
+            pre_db.close()
+            pre_db_gen.close()
+
+        agent2_tools.set_db_context(asteroid_id=asteroid_id, strategy_id=strategy_id)
+
         # Phase 2
         print("-> Agent 2: Strategic Planning")
         print("  [Orchestrator] Waiting 15s before Agent 2 (TPM rate limit reset for shared organization)...")
         await asyncio.sleep(15)
         set_agent_api_key(2)
         a2_res = await handle_agent2_planning(str(a1_raw))
+        cuda_results = getattr(agent2_tools, "LAST_CUDA_RESULTS", [])
+        agent2_tools.set_db_context()
 
         # Phase 3
         print("-> Agent 3: Safety Validation")
@@ -108,6 +131,7 @@ async def process_request(mode: str, query: str, session_id: Optional[str] = Non
         await asyncio.sleep(15)
         set_agent_api_key(3)
         a3_res = await handle_agent3_validation(a2_res)
+        ended_at = datetime.utcnow().isoformat() + "Z"
 
         # HITL Logic
         is_approved = "APPROVE" in str(a3_res)
@@ -115,11 +139,33 @@ async def process_request(mode: str, query: str, session_id: Optional[str] = Non
         
         # Store for approval step
         MISSION_STATE[session_id] = {
+            "session_id": session_id,
             "status": workflow_status,
+            "asteroid_id": asteroid_id,
+            "strategy_id": strategy_id,
             "a1_data": a1_data,
             "a2_plan": a2_res,
-            "a3_verdict": a3_res
+            "a3_verdict": a3_res,
+            "cuda_results": cuda_results,
+            "started_at": started_at,
+            "ended_at": ended_at,
+            "transaction_status": "PENDING"
         }
+
+        transaction_status = "PENDING"
+        db_session_generator = database.get_db()
+        db_session = next(db_session_generator)
+        try:
+            dbtool.log_mission_run(db_session, MISSION_STATE[session_id])
+            transaction_status = "COMMITTED"
+        except Exception as exc:
+            transaction_status = "ROLLED_BACK"
+            print(f"[Orchestrator] Mission log rollback: {exc}")
+        finally:
+            db_session.close()
+            db_session_generator.close()
+
+        MISSION_STATE[session_id]["transaction_status"] = transaction_status
 
         return {
             "mode": mode,
@@ -129,6 +175,8 @@ async def process_request(mode: str, query: str, session_id: Optional[str] = Non
             "agent_1_threat_data": a1_data,
             "agent_2_strategy": extract_json(a2_res) or a2_res,
             "agent_3_validation": extract_json(a3_res) or a3_res,
+            "generations": cuda_results,
+            "transaction_status": transaction_status,
             "session_id": session_id
         }
         
