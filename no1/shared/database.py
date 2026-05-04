@@ -17,14 +17,13 @@ DB_NAME = os.getenv("DB_NAME", "aegis")
 
 
 def _build_database_url() -> str:
-    password = quote_plus(DB_PASSWORD)
-    return f"mysql+pymysql://{DB_USER}:{password}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+    # Switched to SQLite to avoid MySQL connection issues and the need for sudo passwords
+    return "sqlite:///./aegis.db"
 
 
 engine = create_engine(
     _build_database_url(),
-    pool_pre_ping=True,
-    connect_args={"ssl_disabled": True},
+    connect_args={"check_same_thread": False},
 )
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 

@@ -5,6 +5,53 @@ from typing import Any, Dict
 from sqlalchemy import text
 
 
+def seed_reference_data(session) -> None:
+    # Seed known agents
+    agents = [
+        ("Agent 1", "Intelligence Officer"),
+        ("Agent 2", "Strategic Planner"),
+        ("Agent 3", "Safety Validator")
+    ]
+    for name, role in agents:
+        session.execute(
+            text("INSERT IGNORE INTO agent_ref (Agent_name, Agent_role) VALUES (:name, :role)"),
+            {"name": name, "role": role}
+        )
+
+    # Seed known algorithms
+    algorithms = [
+        ("CUDA_PARALLEL", "Parallel", 256, 1000),
+        ("Grovers Algorithm", "Quantum", 32, 100)
+    ]
+    for name, type_, blocks, iters in algorithms:
+        session.execute(
+            text(
+                "INSERT IGNORE INTO algorithm_ref (Algorithm_name, Algorithm_type, Typical_CUDABlocks_used, Typical_Iterations) "
+                "VALUES (:name, :type, :blocks, :iters)"
+            ),
+            {"name": name, "type": type_, "blocks": blocks, "iters": iters}
+        )
+    session.commit()
+
+def _get_agent_ref_id(session, agent_name: str) -> int:
+    result = session.execute(
+        text("SELECT Agent_ref_id FROM agent_ref WHERE Agent_name LIKE :name"),
+        {"name": f"{agent_name}%"}
+    ).first()
+    if not result:
+        raise ValueError(f"Unknown agent: {agent_name}. Ensure seed_reference_data() was run.")
+    return result[0]
+
+def _get_algorithm_id(session, algo_name: str) -> int:
+    result = session.execute(
+        text("SELECT Algorithm_id FROM algorithm_ref WHERE Algorithm_name = :name"),
+        {"name": algo_name}
+    ).first()
+    if not result:
+        raise ValueError(f"Unknown algorithm: {algo_name}. Ensure seed_reference_data() was run.")
+    return result[0]
+
+
 def _jsonify(value: Any) -> str:
     if isinstance(value, str):
         return value
@@ -100,13 +147,14 @@ def _resolve_asteroid_id(session, payload: Dict[str, Any], fallback_name: str = 
 
 
 def _create_strategy(session, asteroid_id: int, method: str, status: str = "Proposed") -> int:
+    agent_ref_id = _get_agent_ref_id(session, "Agent 2")
     result = session.execute(
         text(
             """
             INSERT INTO deflection_strategy
-                (Asteroid_id, Method, Created_by_agent, Statusof, Created_at)
+                (Asteroid_id, Method, Created_by_agent, Statusof, Created_at, Agent_ref_id)
             VALUES
-                (:asteroid_id, :method, :created_by_agent, :statusof, :created_at)
+                (:asteroid_id, :method, :created_by_agent, :statusof, :created_at, :agent_ref_id)
             """
         ),
         {
@@ -115,6 +163,7 @@ def _create_strategy(session, asteroid_id: int, method: str, status: str = "Prop
             "created_by_agent": "Agent_2",
             "statusof": status,
             "created_at": _now_sql(),
+            "agent_ref_id": agent_ref_id,
         },
     )
     return _to_int(result.lastrowid, 0)
@@ -179,23 +228,27 @@ def log_generation(session, sim_data: Dict[str, Any]) -> None:
     selected_flag = _to_bool(sim_data.get("is_selected"))
     optimal_probability = _to_float(sim_data.get("optimal_probability"), 1.0 if selected_flag else 0.5)
 
+    algorithm_name = sim_data.get("algorithm_name") or sim_data.get("algorithm_used") or "CUDA_PARALLEL"
+    algorithm_id = _get_algorithm_id(session, algorithm_name)
+
     session.execute(
         text(
             """
             INSERT INTO cuda_optimization_result
-                (Simulation_id, Algorithms, Qubits_used, Iterations, Optimal_probability, CUDA_advantage, Optimized_at)
+                (Simulation_id, Algorithms, Qubits_used, Iterations, Optimal_probability, CUDA_advantage, Optimized_at, Algorithm_id)
             VALUES
-                (:simulation_id, :algorithms, :qubits_used, :iterations, :optimal_probability, :cuda_advantage, :optimized_at)
+                (:simulation_id, :algorithms, :qubits_used, :iterations, :optimal_probability, :cuda_advantage, :optimized_at, :algorithm_id)
             """
         ),
         {
             "simulation_id": simulation_id,
-            "algorithms": sim_data.get("algorithm_name") or sim_data.get("algorithm_used") or "CUDA_PARALLEL",
+            "algorithms": algorithm_name,
             "qubits_used": _to_int(sim_data.get("qubits_used"), 32),
             "iterations": max(generation_number, 1),
             "optimal_probability": _clamp(optimal_probability, 0.0, 1.0),
             "cuda_advantage": _to_float(sim_data.get("speedup_factor") or sim_data.get("cuda_advantage"), 1.0),
             "optimized_at": _now_sql(),
+            "algorithm_id": algorithm_id,
         },
     )
 
@@ -215,13 +268,14 @@ def log_safety_evaluation(session, safety_data: Dict[str, Any]) -> None:
     if fragmentation_risk > 1.0:
         fragmentation_risk = fragmentation_risk / 100.0
 
+    agent_ref_id = _get_agent_ref_id(session, "Agent 3")
     session.execute(
         text(
             """
             INSERT INTO safety_evaluation
-                (Simulation_id, Fragmentation_risk, Debris_risk, Approved, Evaluated_by_agent, Evaluated_at)
+                (Simulation_id, Fragmentation_risk, Debris_risk, Approved, Evaluated_by_agent, Evaluated_at, Agent_ref_id)
             VALUES
-                (:simulation_id, :fragmentation_risk, :debris_risk, :approved, :evaluated_by_agent, :evaluated_at)
+                (:simulation_id, :fragmentation_risk, :debris_risk, :approved, :evaluated_by_agent, :evaluated_at, :agent_ref_id)
             """
         ),
         {
@@ -231,6 +285,7 @@ def log_safety_evaluation(session, safety_data: Dict[str, Any]) -> None:
             "approved": _to_bool(safety_data.get("is_approved") or safety_data.get("approved") or safety_data.get("verdict") == "APPROVE"),
             "evaluated_by_agent": safety_data.get("evaluated_by_agent") or "Agent_3",
             "evaluated_at": _now_sql(),
+            "agent_ref_id": agent_ref_id,
         },
     )
     session.commit()
@@ -365,13 +420,13 @@ def log_mission_run(session, state: Dict[str, Any]) -> Dict[str, Any]:
                 text(
                     """
                     INSERT INTO agent_log
-                        (Agent_name, Actions, Related_id, Logged_at)
+                        (Agent_name, Actions, Related_id, Related_table, Logged_at)
                     VALUES
-                        (:agent_name, :actions, :related_id, :logged_at)
+                        (:agent_name, :actions, :related_id, :related_table, :logged_at)
                     """
                 ),
                 {
-                    "agent_name": "Agent 1 -> Agent 2 -> Agent 3",
+                    "agent_name": "Strategic Planner",
                     "actions": _state_text(
                         {
                             "session_id": state.get("session_id"),
@@ -381,7 +436,8 @@ def log_mission_run(session, state: Dict[str, Any]) -> Dict[str, Any]:
                             "a3_verdict": a3_verdict,
                         }
                     ),
-                    "related_id": asteroid_id,
+                    "related_id": strategy_id,
+                    "related_table": "deflection_strategy",
                     "logged_at": _now_sql(),
                 },
             )

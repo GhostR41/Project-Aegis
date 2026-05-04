@@ -46,10 +46,17 @@ def _compute_candidate(candidate: Dict[str, Any], generation_index: int) -> Dict
     gravity_effects_km = float(candidate.get("gravity_effects_km") or (delta_v_ms * 0.001 * lead_time_years * 0.04))
     miss_distance_km = d_original_km + (delta_v_ms * t_remaining_seconds / 1000.0) - gravity_effects_km
 
-    fuel_cost = impactor_mass_kg * (0.015 + delta_v_ms / 50_000.0)
-    energy_deposited_j = 0.5 * impactor_mass_kg * (delta_v_ms ** 2)
-    tensile_strength = _tensile_strength_j_per_kg(composition)
-    fragmentation_risk = (energy_deposited_j / max(tensile_strength, 1.0)) * 100.0
+    impact_vel_ms = float(candidate.get("impact_velocity_ms") or (delta_v_ms * 1000.0 if delta_v_ms > 100.0 else 10000.0))
+    asteroid_mass_kg = float(candidate.get("asteroid_mass_kg") or 5.0e10)
+    
+    fuel_cost = impactor_mass_kg * (0.015 + impact_vel_ms / 50_000.0)
+    energy_deposited_j = 0.5 * impactor_mass_kg * (impact_vel_ms ** 2)
+    
+    # Improved fragmentation risk using Q/Q*D catastrophic disruption threshold
+    # Q*D for ~500m asteroids is approx 500 J/kg
+    q_star_d = 500.0 
+    fragmentation_risk = (energy_deposited_j / (asteroid_mass_kg * q_star_d)) * 100.0
+    
     execution_time_days = max(0.01, (impactor_mass_kg / 10_000.0) + (lead_time_years * 0.02))
     status = _status_from_metrics(miss_distance_km, fragmentation_risk)
 
@@ -83,7 +90,7 @@ def _numpy_fallback(candidates: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
 if cuda is not None:
 
     @cuda.jit
-    def _candidate_kernel(delta_v_ms, impactor_mass_kg, lead_time_years, d_original_km, gravity_effects_km, status_out, miss_distance_out, fragmentation_out, energy_out, fuel_out, exec_out):
+    def _candidate_kernel(delta_v_ms, impact_velocity_ms, impactor_mass_kg, asteroid_mass_kg, lead_time_years, d_original_km, gravity_effects_km, status_out, miss_distance_out, fragmentation_out, energy_out, fuel_out, exec_out):
         idx = cuda.grid(1)
         if idx >= delta_v_ms.size:
             return
@@ -91,9 +98,10 @@ if cuda is not None:
         seconds_per_year = 365.25 * 24.0 * 60.0 * 60.0
         t_remaining_seconds = lead_time_years[idx] * seconds_per_year
         miss_distance = d_original_km[idx] + (delta_v_ms[idx] * t_remaining_seconds / 1000.0) - gravity_effects_km[idx]
-        energy = 0.5 * impactor_mass_kg[idx] * (delta_v_ms[idx] * delta_v_ms[idx])
-        fragmentation = (energy / 500000.0) * 100.0
-        fuel = impactor_mass_kg[idx] * (0.015 + delta_v_ms[idx] / 50000.0)
+        energy = 0.5 * impactor_mass_kg[idx] * (impact_velocity_ms[idx] * impact_velocity_ms[idx])
+        # Use catastrophic disruption threshold of 500 J/kg
+        fragmentation = (energy / (asteroid_mass_kg[idx] * 500.0)) * 100.0
+        fuel = impactor_mass_kg[idx] * (0.015 + impact_velocity_ms[idx] / 50000.0)
         exec_days = max(0.01, (impactor_mass_kg[idx] / 10000.0) + (lead_time_years[idx] * 0.02))
 
         pass_condition = miss_distance > 10000.0 and fragmentation < 100.0
@@ -116,7 +124,9 @@ if cuda is not None:
 
 def _cuda_run(candidates: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     delta_v_ms = np.array([float(item.get("delta_v_ms") or item.get("delta_v_m_s") or 0.0) for item in candidates], dtype=np.float64)
+    impact_velocity_ms = np.array([float(item.get("impact_velocity_ms") or (item.get("delta_v_ms", 0.0) * 1000.0 if float(item.get("delta_v_ms", 0.0)) > 100.0 else 10000.0)) for item in candidates], dtype=np.float64)
     impactor_mass_kg = np.array([float(item.get("impactor_mass_kg") or 0.0) for item in candidates], dtype=np.float64)
+    asteroid_mass_kg = np.array([float(item.get("asteroid_mass_kg") or 5.0e10) for item in candidates], dtype=np.float64)
     lead_time_years = np.array([float(item.get("lead_time_years") or 0.0) for item in candidates], dtype=np.float64)
     d_original_km = np.array([float(item.get("d_original_km") or (8_500.0 + (index + 1) * 125.0)) for index, item in enumerate(candidates)], dtype=np.float64)
     gravity_effects_km = np.array([float(item.get("gravity_effects_km") or 0.0) for item in candidates], dtype=np.float64)
@@ -132,7 +142,9 @@ def _cuda_run(candidates: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     blocks_per_grid = max(1, (len(candidates) + threads_per_block - 1) // threads_per_block)
 
     d_delta_v_ms = cuda.to_device(delta_v_ms)
+    d_impact_velocity_ms = cuda.to_device(impact_velocity_ms)
     d_impactor_mass_kg = cuda.to_device(impactor_mass_kg)
+    d_asteroid_mass_kg = cuda.to_device(asteroid_mass_kg)
     d_lead_time_years = cuda.to_device(lead_time_years)
     d_d_original_km = cuda.to_device(d_original_km)
     d_gravity_effects_km = cuda.to_device(gravity_effects_km)
@@ -145,7 +157,9 @@ def _cuda_run(candidates: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
 
     _candidate_kernel[blocks_per_grid, threads_per_block](
         d_delta_v_ms,
+        d_impact_velocity_ms,
         d_impactor_mass_kg,
+        d_asteroid_mass_kg,
         d_lead_time_years,
         d_d_original_km,
         d_gravity_effects_km,

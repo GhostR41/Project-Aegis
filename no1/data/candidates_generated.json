@@ -2,113 +2,113 @@
   {
     "id": 0,
     "strategy": "kinetic",
-    "velocity_km_s": 1.68,
-    "angle_degrees": 1.55,
+    "velocity_km_s": 1.14,
+    "angle_degrees": 65.24,
     "estimated_impact_energy_kt": 0.0
   },
   {
     "id": 1,
     "strategy": "kinetic",
-    "velocity_km_s": 4.6,
-    "angle_degrees": 0.31,
+    "velocity_km_s": 0.26,
+    "angle_degrees": 28.74,
     "estimated_impact_energy_kt": 0.0
   },
   {
     "id": 2,
     "strategy": "kinetic",
-    "velocity_km_s": 8.08,
-    "angle_degrees": 21.48,
-    "estimated_impact_energy_kt": 0.01
+    "velocity_km_s": 5.22,
+    "angle_degrees": 41.34,
+    "estimated_impact_energy_kt": 0.0
   },
   {
     "id": 3,
     "strategy": "kinetic",
-    "velocity_km_s": 4.5,
-    "angle_degrees": 76.92,
-    "estimated_impact_energy_kt": 0.0
+    "velocity_km_s": 8.07,
+    "angle_degrees": 33.96,
+    "estimated_impact_energy_kt": 0.01
   },
   {
     "id": 4,
     "strategy": "kinetic",
-    "velocity_km_s": 7.11,
-    "angle_degrees": 56.19,
+    "velocity_km_s": 8.73,
+    "angle_degrees": 20.7,
     "estimated_impact_energy_kt": 0.01
   },
   {
     "id": 5,
     "strategy": "kinetic",
-    "velocity_km_s": 3.58,
-    "angle_degrees": 10.3,
+    "velocity_km_s": 2.67,
+    "angle_degrees": 12.56,
     "estimated_impact_energy_kt": 0.0
   },
   {
     "id": 6,
     "strategy": "kinetic",
-    "velocity_km_s": 8.3,
-    "angle_degrees": 59.34,
+    "velocity_km_s": 8.78,
+    "angle_degrees": 25.8,
     "estimated_impact_energy_kt": 0.01
   },
   {
     "id": 7,
     "strategy": "kinetic",
-    "velocity_km_s": 5.48,
-    "angle_degrees": 81.52,
+    "velocity_km_s": 1.65,
+    "angle_degrees": 27.27,
     "estimated_impact_energy_kt": 0.0
   },
   {
     "id": 8,
     "strategy": "kinetic",
-    "velocity_km_s": 7.63,
-    "angle_degrees": 9.15,
+    "velocity_km_s": 6.91,
+    "angle_degrees": 58.51,
     "estimated_impact_energy_kt": 0.01
   },
   {
     "id": 9,
     "strategy": "kinetic",
-    "velocity_km_s": 9.16,
-    "angle_degrees": 14.29,
-    "estimated_impact_energy_kt": 0.01
+    "velocity_km_s": 3.43,
+    "angle_degrees": 17.18,
+    "estimated_impact_energy_kt": 0.0
   },
   {
     "id": 10,
     "strategy": "kinetic",
-    "velocity_km_s": 6.43,
-    "angle_degrees": 63.31,
-    "estimated_impact_energy_kt": 0.0
+    "velocity_km_s": 8.57,
+    "angle_degrees": 46.33,
+    "estimated_impact_energy_kt": 0.01
   },
   {
     "id": 11,
     "strategy": "kinetic",
-    "velocity_km_s": 3.38,
-    "angle_degrees": 49.38,
+    "velocity_km_s": 5.99,
+    "angle_degrees": 66.75,
     "estimated_impact_energy_kt": 0.0
   },
   {
     "id": 12,
     "strategy": "kinetic",
-    "velocity_km_s": 0.57,
-    "angle_degrees": 57.97,
+    "velocity_km_s": 5.04,
+    "angle_degrees": 16.25,
     "estimated_impact_energy_kt": 0.0
   },
   {
     "id": 13,
     "strategy": "kinetic",
-    "velocity_km_s": 3.55,
-    "angle_degrees": 75.4,
+    "velocity_km_s": 1.5,
+    "angle_degrees": 54.69,
     "estimated_impact_energy_kt": 0.0
   },
   {
     "id": 14,
     "strategy": "kinetic",
-    "velocity_km_s": 3.9,
-    "angle_degrees": 77.35,
-    "estimated_impact_energy_kt": 0.0
+    "velocity_km_s": 8.21,
+    "angle_degrees": 1.46,
+    "estimated_impact_energy_kt": 0.01
   },
   {
     "id": 15,
     "strategy": "kinetic",
-    "velocity_km_s": 1.94,
-    "angle_degrees": 26.5,
+    "velocity_km_s": 1.49,
+    "angle_degrees": 9.98,
     "estimated_impact_energy_kt": 0.0
   }
 ]

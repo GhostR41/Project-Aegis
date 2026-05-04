@@ -65,11 +65,16 @@ async def handle_agent2_planning(asteroid_data_json: str) -> str:
     messages = [
         {"role": "system", "content": instructions},
         {"role": "user", "content": (
-            f"Asteroid Data:\n{asteroid_data_json}\n\n"
+            f"Asteroid Data (from Threat Assessment):\n{asteroid_data_json}\n\n"
             "PROCEDURE:\n"
             "1. Call calculate_deflection_parameters with the asteroid's mass and days_until_approach.\n"
             "2. Call generate_simulation_space with strategy_type='kinetic', reasonable velocity and angle ranges.\n"
-            "3. Synthesize the results into a final mission plan as JSON."
+            "3. Synthesize the results into a final mission plan with the following structure. Do NOT return raw JSON. Instead, return a formatted markdown report:\n"
+            "   - Threat Assessment: Summarize the provided Asteroid Data (paragraph + table), and its Danger Classification.\n"
+            "   - Deflection Plan Generation: Display all 16 calculated plans in a tabular form. Then point out the best one amongst it and show it in the form of a paragraph and a list.\n"
+            "   - Physics Calculations: Show the physics formulas used and the step-by-step calculations made for the best plan.\n"
+            "   - Scientific Justification: Support the final outcome with the help of physics laws and the calculations from the previous step.\n"
+            "   - User Advisory: Explicitly advise the user to go through the final plan and not to follow the AI recommendations blindly."
         )}
     ]
 

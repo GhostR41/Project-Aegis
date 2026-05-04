@@ -140,6 +140,19 @@ async def handle_agent1_routing(mode: str, query: str) -> Dict[str, Any]:
             "2. If not found locally, search the web (search_web_for_asteroid).\n"
             "3. Answer the user based on retrieved data. If out of domain, politely refuse."
         )
+    elif mode == "assess_threat":
+        prompt = (
+            f"Assess the threat level for: {query}.\n\n"
+            "PROCEDURE:\n"
+            "1. First call lookup_asteroid with the asteroid name to get its data from the local database.\n"
+            "2. If not found locally, call search_web_for_asteroid.\n"
+            "3. Once you have the data, call threat_calculator_tool with the asteroid's mass, velocity, diameter, impact_probability, and name.\n"
+            "4. Present your findings to the user as a clear, human-readable report with the following structure:\n"
+            "   - Asteroid Information: Provide in both a paragraph and tabular form.\n"
+            "   - Physics Calculations: Show the exact physics formulas and step-by-step calculations performed.\n"
+            "   - Danger Classification: Classify the threat level as <Low>, <High>, or <Critical>, and explain why this level was chosen based on your physics calculations.\n"
+            "Do NOT return raw JSON."
+        )
     else:
         prompt = (
             f"Retrieve data for: {query}.\n\n"

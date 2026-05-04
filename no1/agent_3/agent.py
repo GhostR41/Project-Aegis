@@ -55,7 +55,7 @@ async def handle_agent3_validation(mission_plan: str) -> str:
                         "velocity_km_s": {"type": "number", "description": "Impact velocity in km/s"},
                         "impactor_mass_kg": {"type": "number", "description": "Mass of the impactor spacecraft in kg"},
                         "asteroid_mass_kg": {"type": "number", "description": "Mass of the asteroid in kg"},
-                        "time_to_impact_days": {"type": "integer", "description": "Days until the asteroid's predicted impact"}
+                        "time_to_impact_days": {"type": "number", "description": "Days until the asteroid's predicted impact"}
                     },
                     "required": ["velocity_km_s", "impactor_mass_kg", "asteroid_mass_kg", "time_to_impact_days"]
                 }
@@ -88,7 +88,11 @@ async def handle_agent3_validation(mission_plan: str) -> str:
             "   Use typical impactor mass of 610 kg (DART-class) if not specified.\n"
             "2. Call calculate_deflection_distance to verify sufficient deflection.\n"
             "3. Call evaluate_safety_score with the two results and a confidence of 0.85.\n"
-            "4. Return your final verdict as JSON with is_approved, safety_score, and rationale."
+            "4. Return your final verdict as JSON. Structure: { \"is_approved\": bool, \"safety_score\": float, \"rationale\": string, \"detailed_rationale\": string, \"failure_handling\": string (optional), \"acceptance_handling\": string (optional) }.\n"
+            "   ENHANCEMENTS:\n"
+            "   - 'detailed_rationale': Clearly explain why the mission was approved or rejected.\n"
+            "   - 'failure_handling': If is_approved is false, set this to: 'PROMPT: Immediate human intervention or escalation required.'\n"
+            "   - 'acceptance_handling': If is_approved is true, set this to: 'ADVISORY: Please review the deflection plan and physics calculations carefully.'"
         )}
     ]
 

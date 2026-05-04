@@ -2,6 +2,7 @@ import json
 import asyncio
 import uuid
 import os
+import re
 from datetime import datetime
 from typing import Dict, Any, Optional
 from agent_1.agent import handle_agent1_routing
@@ -28,6 +29,17 @@ def set_agent_api_key(agent_num: int):
 # Simple ephemeral state store for the demo
 MISSION_STATE = {}
 
+def markdown_to_html(text: str) -> str:
+    """Converts markdown **bold** and *italic* to HTML tags for the frontend."""
+    if not isinstance(text, str):
+        return text
+    # Convert **bold** to <b>bold</b>
+    text = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', text, flags=re.DOTALL)
+    # Convert *italic* to <i>italic</i>
+    # Use negative lookbehind/lookahead to avoid matching single asterisks that might be part of other formatting or raw text
+    text = re.sub(r'(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)', r'<i>\1</i>', text, flags=re.DOTALL)
+    return text
+
 def extract_json(text: str) -> Dict[str, Any]:
     """Attempts to extract and parse JSON from a message string."""
     try:
@@ -41,7 +53,7 @@ def extract_json(text: str) -> Dict[str, Any]:
         return {}
 
 
-def format_plan_output(agent_1_data: Any, agent_2_data: Any, agent_3_data: Any, workflow_status: str) -> str:
+def format_plan_output(agent_1_data: Any, agent_2_data: Any, agent_3_data: Any, workflow_status: str, cuda_results: list = None) -> str:
     def normalize(value: Any) -> str:
         if isinstance(value, (dict, list)):
             return json.dumps(value, indent=2)
@@ -49,13 +61,39 @@ def format_plan_output(agent_1_data: Any, agent_2_data: Any, agent_3_data: Any, 
             return "N/A"
         return str(value)
 
-    return (
+    output = (
         "ORCHESTRATION SUCCESS\n\n"
         f"WORKFLOW STATUS: {workflow_status}\n\n"
         f"[AGENT 1] THREAT DATA:\n{normalize(agent_1_data)}\n\n"
         f"[AGENT 2] STRATEGY:\n{normalize(agent_2_data)}\n\n"
-        f"[AGENT 3] VALIDATION:\n{normalize(agent_3_data)}"
     )
+
+    if cuda_results:
+        output += "### 16-Generation Deflection Sweep\n"
+        output += "| # | Strategy | Delta-V (m/s) | Miss Distance (km) | Risk (%) | Status |\n"
+        output += "|---|----------|---------------|--------------------|----------|--------|\n"
+        for i, res in enumerate(cuda_results):
+            output += f"| {i+1} | {res.get('strategy', 'kinetic')} | {res.get('delta_v_ms', 0):.6f} | {res.get('miss_distance_km', 0):.2f} | {res.get('fragmentation_risk', 0):.2f} | {res.get('status', 'FAIL')} |\n"
+        output += "\n"
+
+    output += "[AGENT 3] VALIDATION:\n"
+    if isinstance(agent_3_data, dict):
+        status_str = "**APPROVED**" if agent_3_data.get("is_approved") else "**REJECTED**"
+        output += f"Status: {status_str}\n"
+        output += f"Safety Score: {agent_3_data.get('safety_score', 'N/A')}\n"
+        
+        # Priority for detailed_rationale
+        rat = agent_3_data.get("detailed_rationale") or agent_3_data.get("rationale")
+        if rat:
+            output += f"Rationale: {rat}\n"
+            
+        if agent_3_data.get("failure_handling"):
+            output += f"\n**{agent_3_data.get('failure_handling')}**\n"
+        if agent_3_data.get("acceptance_handling"):
+            output += f"\n*{agent_3_data.get('acceptance_handling')}*\n"
+    else:
+        output += normalize(agent_3_data)
+    return output
 
 async def process_request(mode: str, query: str, session_id: Optional[str] = None) -> dict:
     """
@@ -75,13 +113,13 @@ async def process_request(mode: str, query: str, session_id: Optional[str] = Non
     if api_mode == "answer":
         res = await handle_agent1_routing(api_mode, query)
         output = res.get("response") or res.get("agent_1_result") or res.get("message") or "System error: Agent 1 failed to generate a response."
-        return {"final_output": output, "session_id": session_id}
+        return {"final_output": markdown_to_html(str(output)), "session_id": session_id}
         
     elif api_mode == "assess_threat":
         res = await handle_agent1_routing(api_mode, query)
         output = res.get("agent_1_result") or res.get("response") or res.get("message") or "System error: Agent 1 failed to return threat data."
         return {
-            "final_output": output,
+            "final_output": markdown_to_html(str(output)),
             "session_id": session_id
         }
         
@@ -94,16 +132,17 @@ async def process_request(mode: str, query: str, session_id: Optional[str] = Non
         
         if a1_res.get("status") != "success" or not a1_raw:
             fallback_output = a1_raw or a1_res.get("message") or "System error: Agent 1 failed to return threat data."
-            return {"final_output": fallback_output, "status": "error", "session_id": session_id}
+            return {"final_output": markdown_to_html(str(fallback_output)), "status": "error", "session_id": session_id}
 
         if "apologize" in str(a1_raw).lower() or "cannot assist" in str(a1_raw).lower():
-            return {"final_output": a1_raw, "status": "refused", "session_id": session_id}
+            return {"final_output": markdown_to_html(str(a1_raw)), "status": "refused", "session_id": session_id}
 
         asteroid_id = 0
         strategy_id = 0
         pre_db_gen = database.get_db()
         pre_db = next(pre_db_gen)
         try:
+            dbtool.seed_reference_data(pre_db)
             asteroid_id = dbtool.ensure_asteroid(pre_db, a1_data, fallback_name="Agent 1 Asteroid")
             strategy_id = dbtool.ensure_strategy(pre_db, asteroid_id, method="kinetic", status="Proposed")
             pre_db.commit()
@@ -134,7 +173,8 @@ async def process_request(mode: str, query: str, session_id: Optional[str] = Non
         ended_at = datetime.utcnow().isoformat() + "Z"
 
         # HITL Logic
-        is_approved = "APPROVE" in str(a3_res)
+        a3_json = extract_json(a3_res)
+        is_approved = a3_json.get("is_approved", False) if a3_json else "APPROVE" in str(a3_res).upper()
         workflow_status = "AWAITING_HUMAN_APPROVAL" if is_approved else "MISSION_REJECTED"
         
         # Store for approval step
@@ -171,7 +211,7 @@ async def process_request(mode: str, query: str, session_id: Optional[str] = Non
             "mode": mode,
             "status": "success",
             "workflow_status": workflow_status,
-            "final_output": format_plan_output(a1_data, extract_json(a2_res) or a2_res, extract_json(a3_res) or a3_res, workflow_status),
+            "final_output": markdown_to_html(format_plan_output(a1_data, extract_json(a2_res) or a2_res, extract_json(a3_res) or a3_res, workflow_status, cuda_results)),
             "agent_1_threat_data": a1_data,
             "agent_2_strategy": extract_json(a2_res) or a2_res,
             "agent_3_validation": extract_json(a3_res) or a3_res,
